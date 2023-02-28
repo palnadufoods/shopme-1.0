@@ -1,0 +1,46 @@
+*.icon-white {
+	color: white
+}
+
+*.icon-silver {
+	color: silver
+}
+
+*.icon-green {
+	color: green
+}
+
+*.icon-dark {
+	color: dark
+}
+
+*.icon-red {
+	color: red
+}
+
+@media Screen and (max-width:768px){
+	/* small Screen */
+	div.full-details{ display: none }
+	
+	.searchField{
+		width: 50%;
+    	margin-top: 0;
+	}
+}
+
+
+@media Screen and (min-width:768px) and (max-width:1024px){
+	/* medium Screen */
+	div.full-details{ display: block }
+	div.less-details{ display: none }
+	
+	.hideable-column {display:none}
+	
+}
+
+
+@media Screen and (min-width:1024px){
+	/* large Screen */
+	div.less-details{ display:none }
+	
+}

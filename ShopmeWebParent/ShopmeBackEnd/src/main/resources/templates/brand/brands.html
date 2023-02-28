@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragments::page_head('Manage Brands','none')"></head>
+<body>
+	<div class="container-fluid">
+		<div th:replace="navigation :: menu"></div>
+		<div>
+			<h1>Manage Brands</h1>
+		</div>
+
+		<div>
+			<a class="fa-solid fa-folder-plus" th:href="@{/brands/new}"
+				title="Add brand"> </a> &nbsp;| &nbsp; <a
+				class="fa-solid fa-file-csv" th:href="@{/brands/export/csv}"
+				title="Export to CSV"></a> &nbsp;| &nbsp; <a
+				class="fa-solid fa-file-excel" th:href="@{/brands/export/excel}"
+				title="Export to Excel"></a> &nbsp;| &nbsp; <a
+				class="fa-solid fa-file-pdf" th:href="@{/brands/export/pdf}"
+				title="Export to Pdf"></a>
+		</div>
+
+		<div>
+			<form th:action="@{/brands/page/1}" class="form-inline m-3">
+				<input type="hidden" name="sortDir" th:value="${sortDir}" /> <input
+					type="search" name="keyword" th:value="${keyword}"
+					class="form-control searchField" placeholder="Search" required>&nbsp;&nbsp;
+
+				<button type="submit" class="btn">
+					<i class="fas fa-search"></i>
+				</button>
+				&nbsp;&nbsp;
+
+				<button type="button" class="btn clearSearch">
+					<i class="fas fa-eraser"></i>
+				</button>
+			</form>
+		</div>
+
+		<div th:if="${message!=null}" class="alert alert-success text-center">
+			[[${message}]]</div>
+		<div class="full-details">
+			<table
+				class="table table-bordered table-striped table-hover table-responsive-xl">
+				<thead class="thead-dark">
+					<tr>
+						<th class="hideable-column">Id</th>
+						<th>Brand Image</th>
+						<!-- 	<th><a class="text-white"
+							th:href="@{/brands/page/1?sortDir={sd}&sortField=name&keyword={kw} (sd=${sortDir=='asc' ? 'dsc':'asc'},kw=${keyword} )}"
+							th:class="${sortDir=='asc'? 'fas fa-sort-up':'fas fa-sort-down'}">
+								Brand Name </a></th> -->
+
+						<th
+							th:replace="fragments :: column_link1('brands','name', 'Brand Name', 'none')" />
+						<th>Categories</th>
+						<th>Actions</th>
+					</tr>
+				</thead>
+
+				<tbody>
+					<tr th:each="brand:${listOfBrands}">
+						<td class="hideable-column">[[${brand.id}]]</td>
+						<td><img alt="image preview"
+							th:src="@{${brand.getPhotosImagePath}}" width="100" height="100"></td>
+
+						<td>[[${brand.name}]]</td>
+						<td><span th:each="cat:${brand.categories}"
+							class='badge badge-secondary m-1'>[[${cat}]]</span></td>
+
+						<!-- <td>[[${brand.categories}]]</td> -->
+						<td><a class="fa-solid fa-pen-to-square icon-green"
+							th:href="@{/brands/edit/{pgNo}/{id} (id=${brand.id} ,pgNo=${pageNumber} ) }"
+							title="Edit The Brand"> </a> &nbsp; <a
+							th:if="${brand.isHasProducts==false}"
+							class="fa-solid fa-trash link-delete icon-red"
+							th:name="${brand.name}" th:id="${brand.id}"
+							th:href="@{/brands/delete/{pgNo}/{id} (id=${brand.id} , pgNo=${pageNumber})}"
+							title="Delete The Brand"> </a></td>
+
+					</tr>
+
+				</tbody>
+			</table>
+		</div>
+
+
+		<div class="less-details">
+
+			<div th:each="brand:${listOfBrands}" class="row m-1">
+				<div class="col-4">
+					<img alt="image preview" th:src="@{${brand.getPhotosImagePath}}"
+						width="100" height="100">
+				</div>
+
+				<div class="col-8">
+
+					<div>[[${brand.name}]]</div>
+					<div class="mt-2">
+
+						<a class="fa-solid fa-pen-to-square icon-green"
+							th:href="@{/brands/edit/{pgNo}/{id} (id=${brand.id}, pgNo=${pageNumber} )}"
+							title="Edit The brand"> </a> &nbsp; <a
+							th:if="${brand.isHasProducts==false}"
+							class="fa-solid fa-trash link-delete icon-red"
+							th:name="${brand.name}" th:id="${brand.id}"
+							th:href="@{/brands/delete/{pgNo}/{id} (id=${brand.id},pgNo=${pageNumber} )}"
+							title="Delete The brand"> </a>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<div class="text-center m-1"
+			th:if="${totalItems>0 && startCount <=totalItems}">
+			<span>Showing #[[${startCount}]] to [[${endCount}]] of
+				[[${totalItems}]]</span>
+		</div>
+
+
+
+		<div th:replace="navbarPaging::pagination('brands')"></div>
+		<div th:replace="modal_fragments::confirm-model('Delete brand')"></div>
+		<div th:replace="fragments::footer"></div>
+
+		<script type="text/javascript">
+			$(document)
+					.ready(
+							function() {
+								$(".link-delete")
+										.on(
+												"click",
+												function(e) {
+													e.preventDefault();
+													link = $(this);
+													$(".yesbutton").attr(
+															"href",
+															link.attr("href"));
+
+													showModalDialog("Are you Sure Want to Delete brand ["
+															+ $(this).attr(
+																	"name")
+															+ "] Id ["
+															+ $(this)
+																	.attr("id")
+															+ "] ?");
+												})
+
+								$(".clearSearch").on("click", function(e) {
+									location.replace("[[@{/brands}]]")
+								})
+							});
+
+			function showModalDialog(message) {
+				$("#modalBody").text(message);
+				$("#modalDialog").modal();
+			}
+		</script>
+</body>
+</html>

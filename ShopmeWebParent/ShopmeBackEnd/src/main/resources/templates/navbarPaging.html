@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="ISO-8859-1">
+<title>Insert title here</title>
+</head>
+<body>
+
+
+	<div th:fragment="pagination(URL)">
+		<nav aria-label="Page navigation example" th:if="${totalItems>0}">
+			<ul class="pagination justify-content-center flex-wrap">
+
+				<li th:class="${currentPage==1? 'page-item disabled':'page-item'}">
+					<a th:replace="fragments :: page_link(${URL},1,'First')"></a>
+				</li>
+				<li th:class="${currentPage==1? 'page-item disabled':'page-item'}">
+					<a
+					th:replace="fragments :: page_link(${URL},${currentPage-1},'Previous')"></a>
+				</li>
+
+				<th:block th:each="i : ${#numbers.sequence(1, totalPages)}">
+					<li th:class="${currentPage!=i? 'page-item':'page-item active'}">
+						<a th:replace="fragments :: page_link(${URL},${i},${i})"></a>
+					</li>
+				</th:block>
+
+				<li
+					th:class="${currentPage==totalPages? 'page-item disabled':'page-item'}">
+					<a
+					th:replace="fragments :: page_link(${URL},${currentPage+1},'Next')"></a>
+				</li>
+				<li
+					th:class="${currentPage==totalPages? 'page-item disabled':'page-item'}">
+					<a th:replace="fragments :: page_link(${URL},${totalPages},'Last')"></a>
+				</li>
+			</ul>
+		</nav>
+	</div>
+</body>
+</html>

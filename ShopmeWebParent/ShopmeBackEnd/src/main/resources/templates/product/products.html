@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragments::page_head('Manage Brands','none')"></head>
+<body>
+	<div class="container-fluid">
+		<div th:replace="navigation :: menu"></div>
+		<div>
+			<h1>Manage Products</h1>
+		</div>
+
+		<div>
+			<a class="fa-solid fa-folder-plus" th:href="@{/products/new}"
+				title="Add Product"> </a> &nbsp;| &nbsp; <a
+				class="fa-solid fa-file-csv" th:href="@{/products/export/csv}"
+				title="Export to CSV"></a> &nbsp;| &nbsp; <a
+				class="fa-solid fa-file-excel" th:href="@{/products/export/excel}"
+				title="Export to Excel"></a> &nbsp;| &nbsp; <a
+				class="fa-solid fa-file-pdf" th:href="@{/products/export/pdf}"
+				title="Export to Pdf"></a>
+		</div>
+
+		<div>
+			<form th:action="@{/products/page/1}" class="form-inline m-3"
+				id="searchForm">
+
+
+				<input type="hidden" name="sortField" th:value="${sortField}" /> <input
+					type="hidden" name="sortDir" th:value="${sortDir}" />
+
+
+
+
+				Category:&nbsp; <select class="form-control" name="categoryId"
+					id="dropdownCategory">
+					<option value="0">All Categories</option>
+
+					<th:block th:each="cat : ${listCategories}">
+						<option th:value="${cat.id}"
+							th:selected="(${categoryId} == ${cat.id})">[[${cat.name}]]</option>
+					</th:block>
+				</select> &nbsp;&nbsp; <input type="search" name="keyword"
+					th:value="${keyword}" class="form-control searchField"
+					placeholder="Filter" required>
+
+
+
+				<button type="submit" class="btn">
+					<i class="fas fa-search"></i>
+				</button>
+
+				&nbsp;&nbsp;
+
+				<button type="button" class="btn clearSearch">
+					<i class="fas fa-eraser"></i>
+				</button>
+			</form>
+		</div>
+
+		<div th:if="${message!=null}" class="alert alert-success text-center">
+			[[${message}]]</div>
+		<div class="full-details">
+			<table
+				class="table table-bordered table-striped table-hover table-responsive-xl">
+				<thead class="thead-dark">
+					<tr>
+						<th>Id</th>
+						<th>Main Image</th>
+						<!-- <th><a class="text-white"
+							th:href="@{/products/page/1?sortDir={sd}&sortField=name&keyword={kw} (sd=${sortDir=='asc' ? 'dsc':'asc'},kw=${keyword} )}"
+							th:class="${sortDir=='asc'? 'fas fa-sort-up':'fas fa-sort-down'}">
+								Product Name </a></th> -->
+						<th
+							th:replace="fragments :: column_link1('products','name', 'Product Name', 'none')" />
+
+						<th
+							th:replace="fragments :: column_link1('products','brand', 'Brand', 'none')" />
+
+						<th
+							th:replace="fragments :: column_link1('products','category', 'Category', 'none')" />
+
+						<th>Enabled</th>
+						<th>Actions</th>
+					</tr>
+				</thead>
+
+				<tbody>
+					<tr th:each="product:${listOfProducts}">
+						<td>[[${product.id}]]</td>
+						<td><img alt="image.." th:src="@{${product.mainImagePath}}"
+							style="width: 150px; height: 150px" class="image-fluid"></td>
+						<td><a class="link-detail"
+							th:href="@{'/products/detail/'+${product.id}}"
+							th:title="${product.name}">[[${product.shortName}]] </a></td>
+
+						<td>[[${product.brand.name}]]</td>
+						<td>[[${product.category.name}]]</td>
+
+						<td><a th:if="${product.enabled==true}"
+							th:href="@{/products/enable/{id}?enabled=false (id=${product.id})}"
+							class="fa-solid fa-circle-check icon-green"
+							title="Disable Product"></a> <a th:if="${product.enabled!=true}"
+							th:href="@{/products/enable/{id}?enabled=true (id=${product.id}) }"
+							class="fa-solid fa-circle icon-silver" title="Enable Product"></a>
+						</td>
+
+
+						<td><a class="fas fa-file-alt icon-green link-detail"
+							th:href="@{'/products/detail/'+${product.id}}"
+							title="view details of this product"> </a>&nbsp; <a
+							class="fa-solid fa-pen-to-square icon-green"
+							th:href="@{/products/edit/{id} (id=${product.id}) }"
+							title="Edit The Product"> </a> &nbsp; <a
+							class="fa-solid fa-trash link-delete icon-red"
+							th:name="${product.name}" th:id="${product.id}"
+							th:href="@{/products/delete/{id} (id=${product.id} , pgNo=${pageNumber})}"
+							title="Delete The Product"> </a></td>
+
+					</tr>
+
+				</tbody>
+			</table>
+		</div>
+
+		<div class="modal fade" id="detailModal">
+			<div class="modal-dialog modal-xl">
+				<div class="modal-content">
+					<h6>sai</h6>
+				</div>
+			</div>
+		</div>
+
+		<div class="text-center m-1"
+			th:if="${totalItems>0 && startCount <=totalItems}">
+			<span>Showing #[[${startCount}]] to [[${endCount}]] of
+				[[${totalItems}]]</span>
+		</div>
+
+		<div class="text-center m-1" th:unless="${totalItems > 0}">
+			<span>No Data found</span>
+		</div>
+
+
+
+		<div th:replace="navbarPaging::pagination('products')"></div>
+
+		<div th:replace="modal_fragments::confirm-model('Delete product')"></div>
+		<div th:replace="fragments::footer"></div>
+
+		<script type="text/javascript">
+			moduleURL = "[[@{/products}]]"
+			//var moduleURL = "products";
+			//alert(moduleURL);
+			//modURl1 = "products";
+			$(document)
+					.ready(
+							function() {
+								$(".link-delete")
+										.on(
+												"click",
+												function(e) {
+													e.preventDefault();
+													link = $(this);
+													$(".yesbutton").attr(
+															"href",
+															link.attr("href"));
+
+													showModalDialog("Are you Sure Want to Delete product ["
+															+ $(this).attr(
+																	"name")
+															+ "] Id ["
+															+ $(this)
+																	.attr("id")
+															+ "] ?");
+												})
+
+								$(".clearSearch").on("click", function(e) {
+									location.replace("[[@{/products}]]")
+								})
+
+								$(".link-detail").on(
+										"click",
+										function(e) {
+
+											e.preventDefault();
+											linkDetailURL = $(this)
+													.attr("href");
+											//alert(linkDetailURL);
+											$("#detailModal").modal("show")
+													.find(".modal-content")
+													.load(linkDetailURL);
+										})
+
+								$("#dropdownCategory").on("change", function() {
+									$("#searchForm").submit();
+								});
+							});
+
+			function showModalDialog(message) {
+				$("#modalBody").text(message);
+				$("#modalDialog").modal();
+			}
+		</script>
+</body>
+</html>

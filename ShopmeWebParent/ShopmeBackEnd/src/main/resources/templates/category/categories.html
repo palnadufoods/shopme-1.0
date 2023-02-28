@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragments::page_head('Manage Categories','none')"></head>
+<body>
+	<div class="container-fluid">
+		<div th:replace="navigation :: menu"></div>
+		<div>
+			<h1>Manage Categories</h1>
+		</div>
+
+		<div>
+			<a class="fa-solid fa-folder-plus" th:href="@{/categories/new}"
+				title="Add category"> </a> &nbsp;| &nbsp; <a
+				class="fa-solid fa-file-csv" th:href="@{/categories/export/csv}" title="Export to CSV"></a>
+			&nbsp;| &nbsp; <a class="fa-solid fa-file-excel" th:href="@{/categories/export/excel}"
+				title="Export to Excel"></a> &nbsp;| &nbsp; <a
+				class="fa-solid fa-file-pdf" th:href="@{/categories/export/pdf}" title="Export to Pdf"></a>
+		</div>
+
+		<div>
+
+			<form th:action="@{/categories/page/1}" class="form-inline m-3">
+
+				<input type="hidden" name="sortDir" th:value="${sortDir}" /> <input
+					type="search" name="keyword" th:value="${keyword}"
+					class="form-control searchField" placeholder="Search" required>&nbsp;&nbsp;
+
+				<button type="submit" class="btn">
+					<i class="fas fa-search"></i>
+				</button>
+				&nbsp;&nbsp;
+
+				<button type="button" class="btn clearSearch">
+					<i class="fas fa-eraser"></i>
+				</button>
+			</form>
+		</div>
+
+		<div th:if="${message!=null}" class="alert alert-success text-center">
+			[[${message}]]</div>
+		<div class="full-details">
+			<table
+				class="table table-bordered table-striped table-hover table-responsive-xl">
+				<thead class="thead-dark">
+					<tr>
+						<th class="hideable-column">Id</th>
+						<th>Category Image</th>
+						<th><a class="text-white"
+							th:href="@{/categories/page/1?sortDir={sd}&keyword={kw} (sd=${sortDir=='asc' ? 'dsc':'asc'},kw=${keyword} )}"
+							th:class="${sortDir=='asc'? 'fas fa-sort-up':'fas fa-sort-down'}">
+								Category Name </a></th>
+						<th>Alias</th>
+						<th>Enabled</th>
+						<th>Actions</th>
+					</tr>
+				</thead>
+
+				<tbody>
+					<tr th:each="category:${listOfCategories}">
+						<td class="hideable-column">[[${category.id}]]</td>
+						<td><img alt="image preview"
+							th:src="@{${category.getPhotosImagePath}}" width="100"
+							height="100"></td>
+						<td>[[${category.name}]]</td>
+						<td>[[${category.alias}]]</td>
+
+						<td><a th:if="${category.enabled==true}"
+							th:href="@{/categories/enable/{id}?enabled=false (id=${category.id})}"
+							class="fa-solid fa-circle-check icon-green"
+							title="Disable Category"></a> <a
+							th:if="${category.enabled!=true}"
+							th:href="@{/categories/enable/{id}?enabled=true (id=${category.id}) }"
+							class="fa-solid fa-circle icon-silver" title="Enable Category"></a>
+						</td>
+
+						<td><a class="fa-solid fa-pen-to-square icon-green"
+							th:href="@{/categories/edit/{id} (id=${category.id})}"
+							title="Edit The Category"> </a> &nbsp; <a
+							th:if="${category.isHasChildren==false}"
+							class="fa-solid fa-trash link-delete icon-red"
+							th:name="${category.name}" th:id="${category.id}"
+							th:href="@{/categories/delete/{id} (id=${category.id} )}"
+							title="Delete The Category"> </a></td>
+
+					</tr>
+
+				</tbody>
+			</table>
+		</div>
+
+
+		<div class="less-details">
+
+			<div th:each="category:${listOfCategories}" class="row m-1">
+				<div class="col-4">
+					<img alt="image preview" th:src="@{${category.getPhotosImagePath}}"
+						width="100" height="100">
+				</div>
+
+				<div class="col-8">
+
+					<div>[[${category.name}]]</div>
+					<div class="mt-2">
+						<a
+							th:href="@{/categories/enable/{id}?enabled={en} (id=${category.id},en=${category.enabled==true? false : true} )}"
+							th:class="${category.enabled==true? 'fa-solid fa-circle-check icon-green':'fa-solid fa-circle icon-silver'}"></a>
+						<a class="fa-solid fa-pen-to-square icon-green"
+							th:href="@{/categories/edit/{id} (id=${category.id})}"
+							title="Edit The Category"> </a> &nbsp; <a
+							th:if="${category.isHasChildren==false}"
+							class="fa-solid fa-trash link-delete icon-red"
+							th:name="${category.name}" th:id="${category.id}"
+							th:href="@{/categories/delete/{id} (id=${category.id} )}"
+							title="Delete The Category"> </a>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<div class="text-center m-1"
+			th:if="${totalItems>0 && startCount <=totalItems}">
+			<span>Showing #[[${startCount}]] to [[${endCount}]] of
+				[[${totalItems}]]</span>
+		</div>
+
+
+
+		<div th:replace="navbarPaging::pagination('categories')"></div>
+		<div th:replace="modal_fragments::confirm-model('Delete Category')"></div>
+		<div th:replace="fragments::footer"></div>
+
+		<script type="text/javascript">
+			$(document)
+					.ready(
+							function() {
+								$(".link-delete")
+										.on(
+												"click",
+												function(e) {
+													e.preventDefault();
+													link = $(this);
+													$(".yesbutton").attr(
+															"href",
+															link.attr("href"));
+
+													showModalDialog("Are you Sure Want to Delete Category ["
+															+ $(this).attr(
+																	"name")
+															+ "] Id ["
+															+ $(this)
+																	.attr("id")
+															+ "] ?");
+												})
+
+								$(".clearSearch").on("click", function(e) {
+									location.replace("[[@{/categories}]]")
+								})
+							});
+
+			function showModalDialog(message) {
+				$("#modalBody").text(message);
+				$("#modalDialog").modal();
+			}
+		</script>
+</body>
+</html>

@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head th:fragment="page_head(title,remove)" th:remove="${remove}">
+<meta http-equiv="Content-Type" content="text/html charset=UTF-8">
+<meta name="viewport"
+	content="width=divice-width,initial-scale=1.0,minimum-scale=1.0">
+<title>[[${title}]]</title>
+<link rel="stylesheet" type="text/css"
+	th:href="@{/webjars/bootstrap/css/bootstrap.min.css}" />
+
+<link rel="stylesheet" type="text/css" th:href="@{/fontawesome/all.css}" />
+<link rel="stylesheet" type="text/css" th:href="@{/style.css}">
+
+<script type="text/javascript" th:src="@{/webjars/jquery/jquery.min.js}"></script>
+<script type="text/javascript" th:src="@{/js/common.js}"></script>
+<script type="text/javascript" th:src="@{/js/common_form.js}"></script>
+<script type="text/javascript"
+	th:src="@{/webjars/bootstrap/js/bootstrap.min.js}"></script>
+</head>
+
+<body>
+
+	<th th:fragment="column_link1(modU,fieldName,labelName,removeTag)"
+		th:remove="${removeTag}"><a class="text-white"
+		th:href="@{'/{url}/page/{cp}?sortField={sf}&sortDir={sd}&keyword={kw}' + ${categoryId != null ? '&categoryId=' + categoryId : ''} (url=${modU},cp=${currentPage},sf=${fieldName},sd=${sortDir=='asc' ? 'dsc' : 'asc' },kw=${keyword} )}">
+			[[${labelName}]] </a> <span th:if="${sortField==fieldName}"
+		th:class="${sortDir=='asc'? 'fas fa-sort-up':'fas fa-sort-down'}">
+	</span></th>
+
+
+	<th th:fragment="column_link(fieldName,labelName,removeTag)"
+		th:remove="${removeTag}"><a class="text-white"
+		th:href="@{/users/page/{cp}?sortField={sf}&sortDir={sd}&keyword={kw} (cp=${currentPage},sf=${fieldName},sd=${sortDir=='asc' ? 'dsc' : 'asc' },kw=${keyword} )}">
+			[[${labelName}]] </a> <span th:if="${sortField==fieldName}"
+		th:class="${sortDir=='asc'? 'fas fa-sort-up':'fas fa-sort-down'}">
+	</span></th>
+
+	<!-- <th th:fragment="column_link(fieldName, columnLabel, removeTag)" th:remove="${removeTag}"><a class="text-white"
+			th:href="@{${moduleURL1} + '/page/' + ${currentPage} + '?sortField=' + ${fieldName}  +'&sortDir=' + ${sortField != fieldName ? sortDir : reverseSortDir} + ${keyword != null ? '&keyword=' + keyword : ''} + ${categoryId != null ? '&categoryId=' + categoryId : ''}}">
+			[[${columnLabel}]] </a> <span th:if="${sortField == fieldName}"
+			th:class="${sortDir == 'asc' ? 'fas fa-sort-up' : 'fas fa-sort-down'}"></span>
+	</th> -->
+
+	<!-- th:href="@{/{url}/page/{inum}?sortField={sf}&sortDir={sd}&categoryId={cI}&keyword={kw} (url=${URL},inum=${cp}, sf=${sortField},sd=${sortDir},cI=${categoryId},kw=${keyword} )}" -->
+	<a th:fragment="page_link(URL,cp,labelName)" class="page-link"
+		th:href="@{'/{url}/page/{inum}?sortField={sf}&sortDir={sd}'+${keyword != null && keyword !='' ? '&keyword=' + keyword : ''} + ${categoryId != null ? '&categoryId=' + categoryId : ''} (url=${URL},inum=${cp}, sf=${sortField},sd=${sortDir} )  }">[[${labelName}]]
+	</a>
+	
+
+	<div class="text-center" th:fragment="footer">
+		<p>Shopme Control Panel -Copyright &copy; Shopme</p>
+	</div>
+
+</body>
+
+</html>
