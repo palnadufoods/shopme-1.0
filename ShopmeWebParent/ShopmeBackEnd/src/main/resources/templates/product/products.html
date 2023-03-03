@@ -1,6 +1,10 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
-<head th:replace="fragments::page_head('Manage Brands','none')"></head>
+<html xmlns:th="http://www.thymeleaf.org"
+	xmlns:sec="https://www.thymleaf.org/thymleaf-extras-springsecurity5">
+<head th:replace="fragments::page_head('Manage Brands','none')">
+
+
+</head>
 <body>
 	<div class="container-fluid">
 		<div th:replace="navigation :: menu"></div>
@@ -9,14 +13,16 @@
 		</div>
 
 		<div>
-			<a class="fa-solid fa-folder-plus" th:href="@{/products/new}"
-				title="Add Product"> </a> &nbsp;| &nbsp; <a
-				class="fa-solid fa-file-csv" th:href="@{/products/export/csv}"
-				title="Export to CSV"></a> &nbsp;| &nbsp; <a
-				class="fa-solid fa-file-excel" th:href="@{/products/export/excel}"
-				title="Export to Excel"></a> &nbsp;| &nbsp; <a
-				class="fa-solid fa-file-pdf" th:href="@{/products/export/pdf}"
-				title="Export to Pdf"></a>
+			<th:block sec:authorize="hasAnyAuthority('admin','Editor')">
+				<a class="fa-solid fa-folder-plus" th:href="@{/products/new}"
+					title="Add Product"> </a> &nbsp;| &nbsp; <a
+					class="fa-solid fa-file-csv" th:href="@{/products/export/csv}"
+					title="Export to CSV"></a> &nbsp;| &nbsp; <a
+					class="fa-solid fa-file-excel" th:href="@{/products/export/excel}"
+					title="Export to Excel"></a> &nbsp;| &nbsp; <a
+					class="fa-solid fa-file-pdf" th:href="@{/products/export/pdf}"
+					title="Export to Pdf"></a>
+			</th:block>
 		</div>
 
 		<div>
@@ -63,7 +69,10 @@
 				class="table table-bordered table-striped table-hover table-responsive-xl">
 				<thead class="thead-dark">
 					<tr>
-						<th>Id</th>
+
+						<th class="hideable-column">Id</th>
+
+
 						<th>Main Image</th>
 						<!-- <th><a class="text-white"
 							th:href="@{/products/page/1?sortDir={sd}&sortField=name&keyword={kw} (sd=${sortDir=='asc' ? 'dsc':'asc'},kw=${keyword} )}"
@@ -72,48 +81,75 @@
 						<th
 							th:replace="fragments :: column_link1('products','name', 'Product Name', 'none')" />
 
-						<th
-							th:replace="fragments :: column_link1('products','brand', 'Brand', 'none')" />
 
+						<th class="hideable-column">
 						<th
-							th:replace="fragments :: column_link1('products','category', 'Category', 'none')" />
+							th:replace="fragments :: column_link1('products','brand', 'Brand', 'tag')" />
+						</th>
 
-						<th>Enabled</th>
+
+						<th class="hideable-column">
+						<th
+							th:replace="fragments :: column_link1('products','category', 'Category', 'tag')" />
+						</th>
+
+						<th:block sec:authorize="hasAnyAuthority('admin','Editor')">
+							<th>Enabled</th>
+
+						</th:block>
+
+
+
+
 						<th>Actions</th>
 					</tr>
 				</thead>
 
 				<tbody>
 					<tr th:each="product:${listOfProducts}">
-						<td>[[${product.id}]]</td>
-						<td><img alt="image.." th:src="@{${product.mainImagePath}}"
+
+						<td class="hideable-column">[[${product.id}]]</td>
+
+
+						<td colspan="1"><img alt="image.."
+							th:src="@{${product.mainImagePath}}"
 							style="width: 150px; height: 150px" class="image-fluid"></td>
-						<td><a class="link-detail"
+						<td colspan="1" style="max-width: 150px; border: 0px solid red"><a
+							colspan="1" class="link-detail"
+							style="border: 0px solid blue; word-break: break-all"
 							th:href="@{'/products/detail/'+${product.id}}"
 							th:title="${product.name}">[[${product.shortName}]] </a></td>
 
-						<td>[[${product.brand.name}]]</td>
-						<td>[[${product.category.name}]]</td>
+						<td class="hideable-column">[[${product.brand.name}]]</td>
+						<td class="hideable-column">[[${product.category.name}]]</td>
 
-						<td><a th:if="${product.enabled==true}"
-							th:href="@{/products/enable/{id}?enabled=false (id=${product.id})}"
-							class="fa-solid fa-circle-check icon-green"
-							title="Disable Product"></a> <a th:if="${product.enabled!=true}"
-							th:href="@{/products/enable/{id}?enabled=true (id=${product.id}) }"
-							class="fa-solid fa-circle icon-silver" title="Enable Product"></a>
-						</td>
+						<th:block sec:authorize="hasAnyAuthority('admin','Editor')">
+							<td><a th:if="${product.enabled==true}"
+								th:href="@{/products/enable/{id}?enabled=false (id=${product.id})}"
+								class="fa-solid fa-circle-check icon-green"
+								title="Disable Product"></a> <a th:if="${product.enabled!=true}"
+								th:href="@{/products/enable/{id}?enabled=true (id=${product.id}) }"
+								class="fa-solid fa-circle icon-silver" title="Enable Product"></a>
+							</td>
+						</th:block>
 
 
 						<td><a class="fas fa-file-alt icon-green link-detail"
 							th:href="@{'/products/detail/'+${product.id}}"
-							title="view details of this product"> </a>&nbsp; <a
-							class="fa-solid fa-pen-to-square icon-green"
-							th:href="@{/products/edit/{id} (id=${product.id}) }"
-							title="Edit The Product"> </a> &nbsp; <a
-							class="fa-solid fa-trash link-delete icon-red"
-							th:name="${product.name}" th:id="${product.id}"
-							th:href="@{/products/delete/{id} (id=${product.id} , pgNo=${pageNumber})}"
-							title="Delete The Product"> </a></td>
+							title="view details of this product"> </a>&nbsp; <th:block
+								sec:authorize="hasAnyAuthority('admin','Editor','SalesPersion')">
+								<a class="fa-solid fa-pen-to-square icon-green"
+									th:href="@{/products/edit/{id} (id=${product.id}) }"
+									title="Edit The Product"> </a>
+
+							</th:block> &nbsp; <th:block
+								sec:authorize="hasAnyAuthority('admin','Editor')">
+								<a class="fa-solid fa-trash link-delete icon-red"
+									th:name="${product.name}" th:id="${product.id}"
+									th:href="@{/products/delete/{id} (id=${product.id} , pgNo=${pageNumber})}"
+									title="Delete The Product"> </a>
+
+							</th:block></td>
 
 					</tr>
 
@@ -121,6 +157,49 @@
 			</table>
 		</div>
 
+		<div class="less-details">
+
+			<div style="border: 0px solid red"
+				th:each="product:${listOfProducts}" class="row m-1">
+
+				<div class="col-4">
+					<img th:src="@{${product.mainImagePath}}"
+						style="width: 80px; height: auto;" class="img-fluid" />
+				</div>
+
+				<div class="col-8">
+
+					<div style="border: 0px solid red">
+						<a class="link-detail"
+							style="border: 0px solid blue; word-break: break-all"
+							th:href="@{'/products/detail/'+${product.id}}"
+							th:title="${product.name}">[[${product.shortName}]] </a>
+					</div>
+
+					<div class="mt-2">
+						<a class="fas fa-file-alt icon-green link-detail"
+							th:href="@{'/products/detail/'+${product.id}}"
+							title="view details of this product"> </a>&nbsp;
+						<th:block
+							sec:authorize="hasAnyAuthority('admin','Editor','SalesPersion')">
+							<a class="fa-solid fa-pen-to-square icon-green"
+								th:href="@{/products/edit/{id} (id=${product.id}) }"
+								title="Edit The Product"> </a>
+
+						</th:block>
+						&nbsp;
+						<th:block sec:authorize="hasAnyAuthority('admin','Editor')">
+							<a class="fa-solid fa-trash link-delete icon-red"
+								th:name="${product.name}" th:id="${product.id}"
+								th:href="@{/products/delete/{id} (id=${product.id} , pgNo=${pageNumber})}"
+								title="Delete The Product"> </a>
+
+						</th:block>
+					</div>
+
+				</div>
+			</div>
+		</div>
 		<div class="modal fade" id="detailModal">
 			<div class="modal-dialog modal-xl">
 				<div class="modal-content">
@@ -145,60 +224,58 @@
 
 		<div th:replace="modal_fragments::confirm-model('Delete product')"></div>
 		<div th:replace="fragments::footer"></div>
+	</div>
 
-		<script type="text/javascript">
-			moduleURL = "[[@{/products}]]"
-			//var moduleURL = "products";
-			//alert(moduleURL);
-			//modURl1 = "products";
-			$(document)
-					.ready(
-							function() {
-								$(".link-delete")
-										.on(
-												"click",
-												function(e) {
-													e.preventDefault();
-													link = $(this);
-													$(".yesbutton").attr(
-															"href",
-															link.attr("href"));
 
-													showModalDialog("Are you Sure Want to Delete product ["
-															+ $(this).attr(
-																	"name")
-															+ "] Id ["
-															+ $(this)
-																	.attr("id")
-															+ "] ?");
-												})
+	<script type="text/javascript">
+		moduleURL = "[[@{/products}]]"
+		//var moduleURL = "products";
+		//alert(moduleURL);
+		//modURl1 = "products";
+		$(document)
+				.ready(
+						function() {
+							$(".link-delete")
+									.on(
+											"click",
+											function(e) {
+												e.preventDefault();
+												link = $(this);
+												$(".yesbutton").attr("href",
+														link.attr("href"));
 
-								$(".clearSearch").on("click", function(e) {
-									location.replace("[[@{/products}]]")
-								})
+												showModalDialog("Are you Sure Want to Delete product ["
+														+ $(this).attr("name")
+														+ "] Id ["
+														+ $(this).attr("id")
+														+ "] ?");
+											})
 
-								$(".link-detail").on(
-										"click",
-										function(e) {
+							$(".clearSearch").on("click", function(e) {
+								location.replace("[[@{/products}]]")
+							})
 
-											e.preventDefault();
-											linkDetailURL = $(this)
-													.attr("href");
-											//alert(linkDetailURL);
-											$("#detailModal").modal("show")
-													.find(".modal-content")
-													.load(linkDetailURL);
-										})
+							$(".link-detail").on(
+									"click",
+									function(e) {
 
-								$("#dropdownCategory").on("change", function() {
-									$("#searchForm").submit();
-								});
+										e.preventDefault();
+										linkDetailURL = $(this).attr("href");
+										//alert(linkDetailURL);
+										$("#detailModal").modal("show").find(
+												".modal-content").load(
+												linkDetailURL);
+									})
+
+							$("#dropdownCategory").on("change", function() {
+								$("#searchForm").submit();
 							});
+						});
 
-			function showModalDialog(message) {
-				$("#modalBody").text(message);
-				$("#modalDialog").modal();
-			}
-		</script>
+		function showModalDialog(message) {
+			$("#modalBody").text(message);
+			$("#modalDialog").modal();
+		}
+	</script>
 </body>
 </html>

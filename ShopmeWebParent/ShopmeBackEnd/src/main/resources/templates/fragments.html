@@ -26,6 +26,7 @@
 		th:href="@{'/{url}/page/{cp}?sortField={sf}&sortDir={sd}&keyword={kw}' + ${categoryId != null ? '&categoryId=' + categoryId : ''} (url=${modU},cp=${currentPage},sf=${fieldName},sd=${sortDir=='asc' ? 'dsc' : 'asc' },kw=${keyword} )}">
 			[[${labelName}]] </a> <span th:if="${sortField==fieldName}"
 		th:class="${sortDir=='asc'? 'fas fa-sort-up':'fas fa-sort-down'}">
+
 	</span></th>
 
 
@@ -46,7 +47,7 @@
 	<a th:fragment="page_link(URL,cp,labelName)" class="page-link"
 		th:href="@{'/{url}/page/{inum}?sortField={sf}&sortDir={sd}'+${keyword != null && keyword !='' ? '&keyword=' + keyword : ''} + ${categoryId != null ? '&categoryId=' + categoryId : ''} (url=${URL},inum=${cp}, sf=${sortField},sd=${sortDir} )  }">[[${labelName}]]
 	</a>
-	
+
 
 	<div class="text-center" th:fragment="footer">
 		<p>Shopme Control Panel -Copyright &copy; Shopme</p>

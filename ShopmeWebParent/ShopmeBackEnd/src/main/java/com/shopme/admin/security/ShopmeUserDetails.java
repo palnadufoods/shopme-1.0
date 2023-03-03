@@ -14,23 +14,26 @@ import com.shopme.common.entity.User;
 
 public class ShopmeUserDetails implements UserDetails {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	private User user;
-	
+
 	public ShopmeUserDetails(User user) {
-		this.user=user;
+		this.user = user;
 	}
 
 	@Override
 	public Collection<? extends GrantedAuthority> getAuthorities() {
-		
-		Set<Role> roles=user.getRoles();
-		List<SimpleGrantedAuthority> authorities=new ArrayList<SimpleGrantedAuthority>();
-		
-		for(Role role:roles)
-		{
+
+		Set<Role> roles = user.getRoles();
+		List<SimpleGrantedAuthority> authorities = new ArrayList<SimpleGrantedAuthority>();
+
+		for (Role role : roles) {
 			authorities.add(new SimpleGrantedAuthority(role.getName()));
 		}
-		
+
 		return authorities;
 	}
 
@@ -43,22 +46,19 @@ public class ShopmeUserDetails implements UserDetails {
 	public String getUsername() {
 		return user.getEmail();
 	}
-	
-	public String getFullname()
-	{
-		return this.user.getFirstName()+" "+this.user.getLastName();
+
+	public String getFullname() {
+		return this.user.getFirstName() + " " + this.user.getLastName();
 	}
-	
-	public void setFirstName(String firstName)
-	{
+
+	public void setFirstName(String firstName) {
 		this.user.setFirstName(firstName);
 	}
-	
-	public void setLastName(String lastName)
-	{
+
+	public void setLastName(String lastName) {
 		this.user.setLastName(lastName);
 	}
-	
+
 	@Override
 	public boolean isAccountNonExpired() {
 		return true;
@@ -66,20 +66,24 @@ public class ShopmeUserDetails implements UserDetails {
 
 	@Override
 	public boolean isAccountNonLocked() {
-		
+
 		return true;
 	}
 
 	@Override
 	public boolean isCredentialsNonExpired() {
-	
+
 		return true;
 	}
 
 	@Override
 	public boolean isEnabled() {
-		
+
 		return user.isEnabled();
+	}
+
+	public boolean hasRole(String roleName) {
+		return user.hasRole(roleName);
 	}
 
 }
