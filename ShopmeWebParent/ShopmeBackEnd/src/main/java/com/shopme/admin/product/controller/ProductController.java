@@ -32,7 +32,6 @@ import com.shopme.admin.brand.export.BrandCsvExporter;
 import com.shopme.admin.brand.export.BrandExcelExporter;
 import com.shopme.admin.brand.export.BrandPdfExporter;
 import com.shopme.admin.category.CategoryService;
-import com.shopme.admin.product.ProductNotFoundException;
 import com.shopme.admin.product.ProductService;
 import com.shopme.admin.security.ShopmeUserDetails;
 import com.shopme.admin.user.UserNotFoundException;
@@ -240,7 +239,7 @@ public class ProductController {
 
 			return "product/product_form";
 
-		} catch (ProductNotFoundException e) {
+		} catch (com.shopme.common.exception.ProductNotFoundException e) {
 			ra.addFlashAttribute("message", e.getMessage());
 			return "redirect:/products";
 		}
@@ -254,7 +253,7 @@ public class ProductController {
 
 			return "product/product_detail_modal";
 
-		} catch (ProductNotFoundException e) {
+		} catch (com.shopme.common.exception.ProductNotFoundException e) {
 			ra.addFlashAttribute("message", e.getMessage());
 
 			return "redirect:/products";

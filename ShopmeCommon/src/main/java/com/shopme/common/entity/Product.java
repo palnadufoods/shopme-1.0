@@ -81,6 +81,14 @@ public class Product {
 	@JoinColumn(name = "brand_id")
 	private Brand brand;
 
+	private int reviewCount;
+	private float averageRating;
+
+	@Transient
+	private boolean customerCanReview;
+	@Transient
+	private boolean reviewedByCustomer;
+
 	public Integer getId() {
 		return id;
 	}
@@ -305,6 +313,51 @@ public class Product {
 			return name.substring(0, 70).concat("...");
 		}
 		return name;
+	}
+
+	@Transient
+	public float getDiscountPrice() {
+		if (discountPercent > 0) {
+			return price * ((100 - discountPercent) / 100);
+		}
+		return this.price;
+	}
+
+	public int getReviewCount() {
+		return reviewCount;
+	}
+
+	public void setReviewCount(int reviewCount) {
+		this.reviewCount = reviewCount;
+	}
+
+	public float getAverageRating() {
+		return averageRating;
+	}
+
+	public void setAverageRating(float averageRating) {
+		this.averageRating = averageRating;
+	}
+
+	@Transient
+	public String getURI() {
+		return "/p/" + this.alias + "/";
+	}
+
+	public boolean isCustomerCanReview() {
+		return customerCanReview;
+	}
+
+	public void setCustomerCanReview(boolean customerCanReview) {
+		this.customerCanReview = customerCanReview;
+	}
+
+	public boolean isReviewedByCustomer() {
+		return reviewedByCustomer;
+	}
+
+	public void setReviewedByCustomer(boolean reviewedByCustomer) {
+		this.reviewedByCustomer = reviewedByCustomer;
 	}
 
 }

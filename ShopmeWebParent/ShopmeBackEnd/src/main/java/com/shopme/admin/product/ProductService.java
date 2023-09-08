@@ -18,6 +18,7 @@ import com.shopme.admin.brand.BrandRepository;
 import com.shopme.common.entity.Brand;
 import com.shopme.common.entity.Product;
 import com.shopme.common.entity.ProductImage;
+import com.shopme.common.exception.ProductNotFoundException;
 
 @Service
 @Transactional
