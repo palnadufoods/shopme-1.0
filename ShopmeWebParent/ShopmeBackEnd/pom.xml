@@ -20,6 +20,14 @@
 			<artifactId>spring-boot-devtools</artifactId>
 		</dependency>
 
+		<!-- https://mvnrepository.com/artifact/org.springframework.security/spring-security-test -->
+		<dependency>
+			<groupId>org.springframework.security</groupId>
+			<artifactId>spring-security-test</artifactId>
+			<scope>test</scope>
+		</dependency>
+
+
 		<!-- https://mvnrepository.com/artifact/net.sf.supercsv/super-csv -->
 		<dependency>
 			<groupId>net.sf.supercsv</groupId>

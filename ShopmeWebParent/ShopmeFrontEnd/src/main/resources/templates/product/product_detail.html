@@ -50,16 +50,27 @@
 				</div>
 
 				<div>
-					List Price: <span th:if="${product.discountPercent <= 0}">$[[${product.price}]]
+					List Price: <span th:if="${product.discountPercent <= 0}">
+						<div
+							th:replace="product/product_fragment :: price_fragment(${product.price})">
+						</div>
 					</span>
 					<del th:if="${product.discountPercent > 0}">
-						<span> $[[${product.price}]] </span>
+						<!-- <span> [[${CURRENCY_SYMBOL}]] [[${product.price}]] </span> -->
+
+						<div
+							th:replace="product/product_fragment :: price_fragment(${product.price})">
+						</div>
+
 					</del>
 				</div>
 
 				<div th:if="${product.discountPercent > 0}">
-					Price: <span style="font-size: larger; color: darkred">$[[${product.discountPrice}]]</span>
-					([[${product.discountPercent}]] % off)
+					Price: <span style="font-size: larger; color: darkred">
+						<div
+							th:replace="product/product_fragment :: price_fragment(${product.discountPrice})"></div>
+					</span> ([[${#numbers.formatDecimal(product.discountPercent, 1,
+					THOUSANDS_POINT_TYPE, DECIMAL_DIGITS, DECIMAL_POINT_TYPE)}]] % off)
 				</div>
 
 				<div>&nbsp;</div>
@@ -115,7 +126,6 @@
 	</div>
 
 	<script type="text/javascript">
-	
 		$(document).ready(function() {
 			bigImage = $("#bigImage");
 
