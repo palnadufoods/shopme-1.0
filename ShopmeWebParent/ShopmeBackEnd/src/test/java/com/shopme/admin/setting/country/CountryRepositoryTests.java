@@ -61,7 +61,7 @@ public class CountryRepositoryTests {
 	
 	@Test
 	public void testDeleteCountry() {
-		Integer id = 5;
+		Integer id = 10;
 		repo.deleteById(id);
 		
 		Optional<Country> findById = repo.findById(id);

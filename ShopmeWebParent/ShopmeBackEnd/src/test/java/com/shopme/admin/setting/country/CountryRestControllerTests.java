@@ -95,9 +95,9 @@ public class CountryRestControllerTests {
 	}
 
 	@Test
-	@WithMockUser(username = "nam@codejava.net", password = "something", roles = "ADMIN")
+	@WithMockUser(username = "nam@codejava.net", password = "something", roles = "admin")
 	public void testDeleteCountry() throws Exception {
-		Integer countryId = 6;
+		Integer countryId = 10;
 		String url = "/countries/delete/" + countryId;
 		mockMvc.perform(delete(url).with(csrf()))
 		.andExpect(status().isOk());
