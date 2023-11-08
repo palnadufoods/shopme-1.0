@@ -15,6 +15,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import com.shopme.admin.brand.BrandRepository;
+import com.shopme.admin.paging.PagingAndSortingHelper;
 import com.shopme.common.entity.Brand;
 import com.shopme.common.entity.Product;
 import com.shopme.common.entity.ProductImage;
@@ -30,42 +31,54 @@ public class ProductService {
 	@Autowired
 	private ProductImageRepository productImageRepository;
 
-	public static final int PRODUCTS_PER_PAGE = 2;
+	public static final int PRODUCTS_PER_PAGE = 20;
 
 	public List<Product> listAll() {
 		List<Product> list = (List<Product>) repo.findAll();
 		return list;
 	}
 
-	public Page<Product> listByPage(int pageNumber, String sortField, String sortDir, String keyword,
-			Integer categoryId) {
-		if (sortField == null) {
-			sortField = "name";
-		}
-		Sort sort = Sort.by(sortField);
-		sort = sortDir.equals("asc") ? sort.ascending() : sort.descending();
-		Pageable pageable = PageRequest.of(pageNumber - 1, PRODUCTS_PER_PAGE, sort);
-
+	/*
+	 * public Page<Product> listByPage(int pageNumber, String sortField, String
+	 * sortDir, String keyword, Integer categoryId) { if (sortField == null) {
+	 * sortField = "name"; } Sort sort = Sort.by(sortField); sort =
+	 * sortDir.equals("asc") ? sort.ascending() : sort.descending(); Pageable
+	 * pageable = PageRequest.of(pageNumber - 1, PRODUCTS_PER_PAGE, sort);
+	 * 
+	 * Page<Product> page = null; if (keyword != null && !keyword.isEmpty()) { if
+	 * (categoryId != null && categoryId > 0) { String categoryIdMatch = "-" +
+	 * String.valueOf(categoryId) + "-"; page = repo.searchInCategory(categoryId,
+	 * categoryIdMatch, keyword, pageable); } else { return repo.findAll(keyword,
+	 * pageable); } } else { if (categoryId != null && categoryId > 0) { String
+	 * categoryIdMatch = "-" + String.valueOf(categoryId) + "-"; page =
+	 * repo.findAllInCategory(categoryId, categoryIdMatch, pageable); } else { page
+	 * = repo.findAll(pageable); } }
+	 * 
+	 * // return repo.findAll(pageable); return page; }
+	 */
+	public void listByPage(int pageNum, PagingAndSortingHelper helper, Integer categoryId) {
+		Pageable pageable = helper.createPageable(PRODUCTS_PER_PAGE, pageNum);
+		String keyword = helper.getKeyword();
 		Page<Product> page = null;
+		
 		if (keyword != null && !keyword.isEmpty()) {
 			if (categoryId != null && categoryId > 0) {
 				String categoryIdMatch = "-" + String.valueOf(categoryId) + "-";
 				page = repo.searchInCategory(categoryId, categoryIdMatch, keyword, pageable);
 			} else {
-				return repo.findAll(keyword, pageable);
+				page = repo.findAll(keyword, pageable);
 			}
 		} else {
 			if (categoryId != null && categoryId > 0) {
 				String categoryIdMatch = "-" + String.valueOf(categoryId) + "-";
 				page = repo.findAllInCategory(categoryId, categoryIdMatch, pageable);
-			} else {
+			} else {		
 				page = repo.findAll(pageable);
 			}
 		}
-
-		// return repo.findAll(pageable);
-		return page;
-	}
+		
+		helper.updateModelAttributes(pageNum, page);
+	}	
 
 	// findAllInCategory
 

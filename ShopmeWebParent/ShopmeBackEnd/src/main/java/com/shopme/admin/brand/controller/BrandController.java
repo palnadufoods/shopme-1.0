@@ -24,7 +24,8 @@ import com.shopme.admin.brand.export.BrandCsvExporter;
 import com.shopme.admin.brand.export.BrandExcelExporter;
 import com.shopme.admin.brand.export.BrandPdfExporter;
 import com.shopme.admin.category.CategoryService;
-
+import com.shopme.admin.paging.PagingAndSortingHelper;
+import com.shopme.admin.paging.PagingAndSortingParam;
 import com.shopme.admin.user.UserNotFoundException;
 import com.shopme.admin.user.UserService;
 import com.shopme.admin.user.export.UserCsvExporter;
@@ -34,9 +35,11 @@ import com.shopme.common.entity.Brand;
 import com.shopme.common.entity.Category;
 import com.shopme.common.entity.Role;
 import com.shopme.common.entity.User;
+import com.shopme.common.exception.BrandNotFoundException;
 
 @Controller
 public class BrandController {
+	private String defaultRedirectURL = "redirect:/brands/page/1?sortField=name&sortDir=asc";
 
 	@Autowired
 	private BrandService brandService;
@@ -44,62 +47,65 @@ public class BrandController {
 	@Autowired
 	private CategoryService categoryService;
 
-	@GetMapping("/brandsall")
-	public String listAll(Model model) {
-		List<Brand> listOfBrands = brandService.listAll();
-		model.addAttribute("listOfBrands", listOfBrands);
-		return "brand/brands";
-	}
+	/*
+	 * @GetMapping("/brandsall") public String listAll(Model model) { List<Brand>
+	 * listOfBrands = brandService.listAll(); model.addAttribute("listOfBrands",
+	 * listOfBrands); return "brand/brands"; }
+	 */
+
+	/*
+	 * @GetMapping("/brands") public String listFirstPage(Model model) { return
+	 * "redirect:/brands/page/1?sortField=name&sortDir=asc"; }
+	 */
 
 	@GetMapping("/brands")
-	public String listFirstPage(Model model) {
-		/*
-		 * Page<User> page=userService.listByPage(1); List<User>
-		 * listOfUsers=page.getContent();
-		 * 
-		 * System.out.println(page.getTotalElements());
-		 * System.out.println(page.getTotalPages()); model.addAttribute("listOfUsers",
-		 * listOfUsers); return "users";
-		 */
-
-		return "redirect:/brands/page/1?sortField=name&sortDir=asc";
+	public String listFirstPage() {
+		return defaultRedirectURL;
 	}
 
 	@GetMapping("/brands/page/{pageNum}")
-	public String listByPage(Model model, @PathVariable("pageNum") int pageNumber, @Param("sortField") String sortField,
-			@Param("sortDir") String sortDir, @Param("keyword") String keyword) {
-		model.addAttribute("sortDir", sortDir);
-		model.addAttribute("sortField", sortField);
-
-		Page<Brand> page = brandService.listByPage(pageNumber, sortField, sortDir, keyword);
-		List<Brand> listOfBrands = page.getContent();
-
-		long startCount = (pageNumber - 1) * BrandService.BRANDS_PER_PAGE + 1;
-		long endCount = startCount + BrandService.BRANDS_PER_PAGE - 1;
-		if (endCount > page.getTotalElements()) {
-			endCount = page.getTotalElements();
-		}
-		model.addAttribute("startCount", startCount);
-		model.addAttribute("endCount", endCount);
-		model.addAttribute("currentPage", pageNumber);
-
-		model.addAttribute("totalItems", page.getTotalElements());
-		model.addAttribute("totalPages", page.getTotalPages());
-
-		System.out.println("totalItems  " + page.getTotalElements());
-		System.out.println("totalPages  " + page.getTotalPages());
-
-		model.addAttribute("listOfBrands", listOfBrands);
-
-		model.addAttribute("sortField", sortField);
-		model.addAttribute("sortDir", sortDir);
-
-		model.addAttribute("keyword", keyword);
-
-		model.addAttribute("pageNumber", pageNumber);
-
+	public String listByPage(
+			@PagingAndSortingParam(listName = "listOfBrands", moduleURL = "/brands") PagingAndSortingHelper helper,
+			@PathVariable(name = "pageNum") int pageNum) {
+		brandService.listByPage(pageNum, helper);
 		return "brand/brands";
 	}
+
+	/*
+	 * @GetMapping("/brands/page/{pageNum}") public String listByPage(Model
+	 * model, @PathVariable("pageNum") int pageNumber, @Param("sortField") String
+	 * sortField,
+	 * 
+	 * @Param("sortDir") String sortDir, @Param("keyword") String keyword) {
+	 * model.addAttribute("sortDir", sortDir); model.addAttribute("sortField",
+	 * sortField);
+	 * 
+	 * Page<Brand> page = brandService.listByPage(pageNumber, sortField, sortDir,
+	 * keyword); List<Brand> listOfBrands = page.getContent();
+	 * 
+	 * long startCount = (pageNumber - 1) * BrandService.BRANDS_PER_PAGE + 1; long
+	 * endCount = startCount + BrandService.BRANDS_PER_PAGE - 1; if (endCount >
+	 * page.getTotalElements()) { endCount = page.getTotalElements(); }
+	 * model.addAttribute("startCount", startCount); model.addAttribute("endCount",
+	 * endCount); model.addAttribute("currentPage", pageNumber);
+	 * 
+	 * model.addAttribute("totalItems", page.getTotalElements());
+	 * model.addAttribute("totalPages", page.getTotalPages());
+	 * 
+	 * System.out.println("totalItems  " + page.getTotalElements());
+	 * System.out.println("totalPages  " + page.getTotalPages());
+	 * 
+	 * model.addAttribute("listOfBrands", listOfBrands);
+	 * 
+	 * model.addAttribute("sortField", sortField); model.addAttribute("sortDir",
+	 * sortDir);
+	 * 
+	 * model.addAttribute("keyword", keyword);
+	 * 
+	 * model.addAttribute("pageNumber", pageNumber);
+	 * 
+	 * return "brand/brands"; }
+	 */
 
 	@GetMapping("/brands/new")
 	public String newUser(Model model, @Param("sortField") String sortField, @Param("sortDir") String sortDir) {
@@ -154,10 +160,40 @@ public class BrandController {
 		return "redirect:/brands/page/1?sortField=name&sortDir=asc";
 	}
 
-	@GetMapping("/brands/edit/{pageNum}/{id}")
-	public String updateBrand(@PathVariable(name = "pageNum") int pageNum, @PathVariable(name = "id") Integer id,
-			Model model, @Param("sortField") String sortField, @Param("sortDir") String sortDir,
-			@Param("keyword") String keyword, RedirectAttributes redirectAttributes) {
+	/*
+	 * @GetMapping("/brands/edit/{pageNum}/{id}") public String
+	 * updateBrand(@PathVariable(name = "pageNum") int pageNum, @PathVariable(name =
+	 * "id") Integer id, Model model, @Param("sortField") String
+	 * sortField, @Param("sortDir") String sortDir,
+	 * 
+	 * @Param("keyword") String keyword, RedirectAttributes redirectAttributes) {
+	 * try {
+	 * 
+	 * Brand brand = brandService.findById(id);
+	 * 
+	 * if (brand == null) throw new
+	 * UserNotFoundException(" lawada lo ERROR RA IDHI");
+	 * 
+	 * model.addAttribute("pageTitle", "Update Brand[" + id + "]");
+	 * model.addAttribute("brand", brand); model.addAttribute("pageNumber",
+	 * pageNum); model.addAttribute("keyword", keyword);
+	 * model.addAttribute("sortField", sortField); model.addAttribute("sortDir",
+	 * sortDir); model.addAttribute("listOfCategories",
+	 * categoryService.listCatsInSorting(0, "asc"));
+	 * System.out.println("  sort Field >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>" +
+	 * sortField); System.out.println("  sort Dir >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
+	 * + sortDir);
+	 * 
+	 * return "brand/brand_form";
+	 * 
+	 * } catch (UserNotFoundException e) {
+	 * redirectAttributes.addFlashAttribute("message", e.getMessage()); return
+	 * "redirect:/brands/page/" + pageNum + "?sortField=firstName&sortDir=asc"; } }
+	 */
+	
+	@GetMapping("/brands/edit/{id}")
+	public String updateBrand(@PathVariable(name = "id") Integer id, Model model,
+			RedirectAttributes redirectAttributes) {
 		try {
 
 			Brand brand = brandService.findById(id);
@@ -167,34 +203,46 @@ public class BrandController {
 
 			model.addAttribute("pageTitle", "Update Brand[" + id + "]");
 			model.addAttribute("brand", brand);
-			model.addAttribute("pageNumber", pageNum);
-			model.addAttribute("keyword", keyword);
-			model.addAttribute("sortField", sortField);
-			model.addAttribute("sortDir", sortDir);
-			model.addAttribute("listOfCategories", categoryService.listCatsInSorting(0, "asc"));
-			System.out.println("  sort Field >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>" + sortField);
-			System.out.println("  sort Dir >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>" + sortDir);
-
+			model.addAttribute("listOfCategories", categoryService.listCatsInSorting(0, "asc"));			
 			return "brand/brand_form";
 
 		} catch (UserNotFoundException e) {
 			redirectAttributes.addFlashAttribute("message", e.getMessage());
-			return "redirect:/brands/page/" + pageNum + "?sortField=firstName&sortDir=asc";
+			// return "redirect:/brands/page/" + pageNum +
+			// "?sortField=firstName&sortDir=asc";
+			return defaultRedirectURL;
 		}
-
 	}
 
-	@GetMapping("/brands/delete/{pageNum}/{id}")
-	public String deleteBrand(@PathVariable(name = "pageNum") int pageNum, @PathVariable(name = "id") Integer id,
-			@Param("sortField") String sortField, @Param("sortDir") String sortDir, @Param("keyword") String keyword,
-			Model model, RedirectAttributes redirectAttributes) {
+	/*
+	 * @GetMapping("/brands/delete/{pageNum}/{id}") public String
+	 * deleteBrand(@PathVariable(name = "pageNum") int pageNum, @PathVariable(name =
+	 * "id") Integer id,
+	 * 
+	 * @Param("sortField") String sortField, @Param("sortDir") String
+	 * sortDir, @Param("keyword") String keyword, Model model, RedirectAttributes
+	 * redirectAttributes) {
+	 * 
+	 * brandService.deleteById(id); redirectAttributes.addFlashAttribute("message",
+	 * "Brand Id " + id + " Deleted Successfully");
+	 * 
+	 * // return "redirect:/brands/page/" + pageNum + "?sortField=" + sortField + //
+	 * "&sortDir=" + sortDir; return "redirect:/brands/page/" + pageNum +
+	 * "?sortField=name&sortDir=asc"; }
+	 */
 
-		brandService.deleteById(id);
-		redirectAttributes.addFlashAttribute("message", "Brand Id " + id + " Deleted Successfully");
-
-		// return "redirect:/brands/page/" + pageNum + "?sortField=" + sortField +
-		// "&sortDir=" + sortDir;
-		return "redirect:/brands/page/" + pageNum + "?sortField=name&sortDir=asc";
+	@GetMapping("/brands/delete/{id}")
+	public String deleteBrand(@PathVariable(name = "id") Integer id, Model model,
+			RedirectAttributes redirectAttributes) {
+		try {
+			brandService.deleteById(id);
+			redirectAttributes.addFlashAttribute("message", "Brand Id " + id + " Deleted Successfully");
+			String deleteDir = "brand-photos/" + id;
+			FileUploadUtil.removeDir(deleteDir);
+		} catch(Exception ex) {
+			redirectAttributes.addFlashAttribute("message", ex.getMessage());
+		}
+		return defaultRedirectURL;
 	}
 
 	@GetMapping("/brands/export/csv")

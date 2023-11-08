@@ -32,6 +32,8 @@ import com.shopme.admin.brand.export.BrandCsvExporter;
 import com.shopme.admin.brand.export.BrandExcelExporter;
 import com.shopme.admin.brand.export.BrandPdfExporter;
 import com.shopme.admin.category.CategoryService;
+import com.shopme.admin.paging.PagingAndSortingHelper;
+import com.shopme.admin.paging.PagingAndSortingParam;
 import com.shopme.admin.product.ProductService;
 import com.shopme.admin.security.ShopmeUserDetails;
 import com.shopme.admin.user.UserNotFoundException;
@@ -48,6 +50,8 @@ import com.shopme.common.entity.User;
 
 @Controller
 public class ProductController {
+	
+	private String defaultRedirectURL = "redirect:/products/page/1?sortField=name&sortDir=asc&categoryId=0";
 
 	@Autowired
 	private ProductService productService;
@@ -60,71 +64,83 @@ public class ProductController {
 
 	public List<ProductImage> toBeDeleted;
 
+	/*
+	 * @GetMapping("/products") public String listAll(Model model) { return
+	 * "redirect:/products/page/1?sortField=name&sortDir=asc"; }
+	 */
+	
 	@GetMapping("/products")
-	public String listAll(Model model) {
-//		List<Product> listOfProducts = productService.listAll();
-//		model.addAttribute("listOfProducts", listOfProducts);
-//		return "product/products";
-		return "redirect:/products/page/1?sortField=name&sortDir=asc";
-	}
-
-	@GetMapping("/products1")
 	public String listFirstPage(Model model) {
-		/*
-		 * Page<User> page=userService.listByPage(1); List<User>
-		 * listOfUsers=page.getContent();
-		 * 
-		 * System.out.println(page.getTotalElements());
-		 * System.out.println(page.getTotalPages()); model.addAttribute("listOfUsers",
-		 * listOfUsers); return "users";
-		 */
-
-		return "redirect:/products/page/1?sortField=name&sortDir=asc";
+		return defaultRedirectURL;
 	}
-
+	
+	
+	
 	@GetMapping("/products/page/{pageNum}")
-	public String listByPage(Model model, @PathVariable("pageNum") int pageNumber, @Param("sortField") String sortField,
-			@Param("sortDir") String sortDir, @Param("keyword") String keyword,
-			@Param("categoryId") Integer categoryId) {
-		model.addAttribute("sortDir", sortDir);
-		model.addAttribute("sortField", sortField);
-
-		Page<Product> page = productService.listByPage(pageNumber, sortField, sortDir, keyword, categoryId);
-		List<Product> listOfProducts = page.getContent();
-
-		List<Category> listCategories = // categoryService.listCategoriesUsedInForm();
-				categoryService.listCatsInSorting(1, "asc");
-
-		if (categoryId != null)
-			model.addAttribute("categoryId", categoryId);
+	public String listByPage(
+			@PagingAndSortingParam(listName = "listOfProducts", moduleURL = "/products") PagingAndSortingHelper helper,
+			@PathVariable(name = "pageNum") int pageNum, Model model,
+			Integer categoryId
+			) {
+		
+		productService.listByPage(pageNum, helper, categoryId);
+		
+		List<Category> listCategories = categoryService.listCatsInSorting(1, "asc");
+		//categoryService.listCategoriesUsedInForm();
+				
+		
+		if (categoryId != null) model.addAttribute("categoryId", categoryId);
 		model.addAttribute("listCategories", listCategories);
-
-		long startCount = (pageNumber - 1) * ProductService.PRODUCTS_PER_PAGE + 1;
-		long endCount = startCount + ProductService.PRODUCTS_PER_PAGE - 1;
-		if (endCount > page.getTotalElements()) {
-			endCount = page.getTotalElements();
-		}
-		model.addAttribute("startCount", startCount);
-		model.addAttribute("endCount", endCount);
-		model.addAttribute("currentPage", pageNumber);
-
-		model.addAttribute("totalItems", page.getTotalElements());
-		model.addAttribute("totalPages", page.getTotalPages());
-
-		System.out.println("totalItems  " + page.getTotalElements());
-		System.out.println("totalPages  " + page.getTotalPages());
-
-		model.addAttribute("listOfProducts", listOfProducts);
-
-		model.addAttribute("sortField", sortField);
-		model.addAttribute("sortDir", sortDir);
-
-		model.addAttribute("keyword", keyword);
-
-		model.addAttribute("pageNumber", pageNumber);
-
-		return "product/products";
+		
+		return "product/products";		
 	}
+
+	/*
+	 * @GetMapping("/products/page/{pageNum}") public String listByPage(Model
+	 * model, @PathVariable("pageNum") int pageNumber, @Param("sortField") String
+	 * sortField,
+	 * 
+	 * @Param("sortDir") String sortDir, @Param("keyword") String keyword,
+	 * 
+	 * @Param("categoryId") Integer categoryId) { model.addAttribute("sortDir",
+	 * sortDir); model.addAttribute("sortField", sortField);
+	 * 
+	 * Page<Product> page = productService.listByPage(pageNumber, sortField,
+	 * sortDir, keyword, categoryId); List<Product> listOfProducts =
+	 * page.getContent();
+	 * 
+	 * List<Category> listCategories = //
+	 * categoryService.listCategoriesUsedInForm();
+	 * categoryService.listCatsInSorting(1, "asc");
+	 * 
+	 * if (categoryId != null) model.addAttribute("categoryId", categoryId);
+	 * model.addAttribute("listCategories", listCategories);
+	 * 
+	 * long startCount = (pageNumber - 1) * ProductService.PRODUCTS_PER_PAGE + 1;
+	 * long endCount = startCount + ProductService.PRODUCTS_PER_PAGE - 1; if
+	 * (endCount > page.getTotalElements()) { endCount = page.getTotalElements(); }
+	 * model.addAttribute("startCount", startCount); model.addAttribute("endCount",
+	 * endCount); model.addAttribute("currentPage", pageNumber);
+	 * 
+	 * model.addAttribute("totalItems", page.getTotalElements());
+	 * model.addAttribute("totalPages", page.getTotalPages());
+	 * 
+	 * System.out.println("totalItems  " + page.getTotalElements());
+	 * System.out.println("totalPages  " + page.getTotalPages());
+	 * 
+	 * model.addAttribute("listOfProducts", listOfProducts);
+	 * 
+	 * model.addAttribute("sortField", sortField); model.addAttribute("sortDir",
+	 * sortDir);
+	 * 
+	 * model.addAttribute("keyword", keyword);
+	 * 
+	 * model.addAttribute("pageNumber", pageNumber);
+	 * 
+	 * return "product/products"; }
+	 */
+	
+	
 
 	@GetMapping("/products/new")
 	public String newUser(Model model, @Param("sortField") String sortField, @Param("sortDir") String sortDir) {
