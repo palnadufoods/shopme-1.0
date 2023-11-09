@@ -11,8 +11,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import com.shopme.admin.paging.PagingAndSortingHelper;
 import com.shopme.admin.user.RoleRepository;
 import com.shopme.common.entity.Brand;
+import com.shopme.common.exception.BrandNotFoundException;
 
 @Service
 @Transactional
@@ -28,18 +30,21 @@ public class BrandService {
 		return (List<Brand>) brandRepo.findAll(Sort.by("name").ascending());
 	}
 
-	public Page<Brand> listByPage(int pageNumber, String sortField, String sortDir, String keyword) {
-		if (sortField == null) {
-			sortField = "name";
-		}
-		Sort sort = Sort.by(sortField);
-		sort = sortDir.equals("asc") ? sort.ascending() : sort.descending();
-		Pageable pageable = PageRequest.of(pageNumber - 1, BRANDS_PER_PAGE, sort);
-
-		if (keyword != null)
-			return brandRepo.findAll(keyword, pageable);
-		return brandRepo.findAll(pageable);
-
+	/*
+	 * public Page<Brand> listByPage(int pageNumber, String sortField, String
+	 * sortDir, String keyword) { if (sortField == null) { sortField = "name"; }
+	 * Sort sort = Sort.by(sortField); sort = sortDir.equals("asc") ?
+	 * sort.ascending() : sort.descending(); Pageable pageable =
+	 * PageRequest.of(pageNumber - 1, BRANDS_PER_PAGE, sort);
+	 * 
+	 * if (keyword != null) return brandRepo.findAll(keyword, pageable); return
+	 * brandRepo.findAll(pageable);
+	 * 
+	 * }
+	 */
+	
+	public void listByPage(int pageNum, PagingAndSortingHelper helper) {
+		helper.listEntities(pageNum, BRANDS_PER_PAGE, brandRepo);
 	}
 
 	public Brand save(Brand brand) {

@@ -9,11 +9,12 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.stereotype.Repository;
 
+import com.shopme.admin.paging.SearchRepository;
 import com.shopme.common.entity.Brand;
 import com.shopme.common.entity.User;
 
 @Repository
-public interface BrandRepository extends PagingAndSortingRepository<Brand, Integer> {
+public interface BrandRepository extends SearchRepository<Brand, Integer> {
 
 	@Query("select b from Brand b Where CONCAT(b.id,' ',b.name) LIKE %?1%")
 	public Page<Brand> findAll(String keyword, Pageable pageable);

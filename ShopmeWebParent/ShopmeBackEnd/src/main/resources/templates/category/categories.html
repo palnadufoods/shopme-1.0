@@ -128,8 +128,10 @@
 		<div th:replace="navbarPaging::pagination('categories')"></div>
 		<div th:replace="modal_fragments::confirm-model('Delete Category')"></div>
 		<div th:replace="fragments::footer"></div>
-
+		
+		<script th:src="@{/js/common_list.js}"></script>
 		<script type="text/javascript">
+			moduleURL = "[[@{/categories}]]";
 			$(document)
 					.ready(
 							function() {

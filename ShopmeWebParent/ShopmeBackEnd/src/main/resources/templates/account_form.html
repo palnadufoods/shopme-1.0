@@ -101,13 +101,15 @@
 
 	<div th:replace="fragments::footer"></div>
 	<script type="text/javascript">
-		$(document).ready(function() {
+	
+		/* $(document).ready(function() {
 			$("#buttonCancel").on("click", function() {
 				window.location = "[[@{/}]]"
 			})
 
-		});
-
+		}); */
+		
+		moduleURL = "[[@{/}]]";
 		function checkPasswordMatch(confirmPassword) {
 			if (confirmPassword.value != $("#password").val()) {
 				confirmPassword.setCustomValidity("Passwords do not match!");
@@ -116,5 +118,6 @@
 			}
 		}
 	</script>
+	<script th:src="@{/js/common_form.js}"></script>
 </body>
 </html>
