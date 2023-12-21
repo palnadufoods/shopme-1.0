@@ -13,12 +13,13 @@ import org.springframework.stereotype.Component;
 
 import com.shopme.common.entity.AuthenticationType;
 import com.shopme.common.entity.Customer;
+import com.shopme.customer.CustomerService;
 //import com.shopme.customer.CustomerService;
 
 @Component
 public class DatabaseLoginSuccessHandler extends SavedRequestAwareAuthenticationSuccessHandler {
 	
-	//@Autowired private CustomerService customerService;
+	@Autowired private CustomerService customerService;
 
 	@Override
 	public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
@@ -26,7 +27,7 @@ public class DatabaseLoginSuccessHandler extends SavedRequestAwareAuthentication
 		CustomerUserDetails userDetails = (CustomerUserDetails) authentication.getPrincipal();
 		Customer customer = userDetails.getCustomer();
 		
-		//customerService.updateAuthenticationType(customer, AuthenticationType.DATABASE);
+		customerService.updateAuthenticationType(customer, AuthenticationType.DATABASE);
 		
 		super.onAuthenticationSuccess(request, response, authentication);
 	}

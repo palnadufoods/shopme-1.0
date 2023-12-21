@@ -26,6 +26,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import com.shopme.admin.AmazonS3Util;
 import com.shopme.admin.FileUploadUtil;
 import com.shopme.admin.brand.BrandService;
 import com.shopme.admin.brand.export.BrandCsvExporter;
@@ -50,7 +51,7 @@ import com.shopme.common.entity.User;
 
 @Controller
 public class ProductController {
-	
+
 	private String defaultRedirectURL = "redirect:/products/page/1?sortField=name&sortDir=asc&categoryId=0";
 
 	@Autowired
@@ -68,31 +69,28 @@ public class ProductController {
 	 * @GetMapping("/products") public String listAll(Model model) { return
 	 * "redirect:/products/page/1?sortField=name&sortDir=asc"; }
 	 */
-	
+
 	@GetMapping("/products")
 	public String listFirstPage(Model model) {
+
 		return defaultRedirectURL;
 	}
-	
-	
-	
+
 	@GetMapping("/products/page/{pageNum}")
 	public String listByPage(
 			@PagingAndSortingParam(listName = "listOfProducts", moduleURL = "/products") PagingAndSortingHelper helper,
-			@PathVariable(name = "pageNum") int pageNum, Model model,
-			Integer categoryId
-			) {
-		
+			@PathVariable(name = "pageNum") int pageNum, Model model, Integer categoryId) {
+
 		productService.listByPage(pageNum, helper, categoryId);
-		
+
 		List<Category> listCategories = categoryService.listCatsInSorting(1, "asc");
-		//categoryService.listCategoriesUsedInForm();
-				
-		
-		if (categoryId != null) model.addAttribute("categoryId", categoryId);
+		// categoryService.listCategoriesUsedInForm();
+
+		if (categoryId != null)
+			model.addAttribute("categoryId", categoryId);
 		model.addAttribute("listCategories", listCategories);
-		
-		return "product/products";		
+
+		return "product/products";
 	}
 
 	/*
@@ -139,27 +137,27 @@ public class ProductController {
 	 * 
 	 * return "product/products"; }
 	 */
-	
-	
 
 	@GetMapping("/products/new")
-	public String newUser(Model model, @Param("sortField") String sortField, @Param("sortDir") String sortDir) {
+	public String newUser(Model model/* , @Param("sortField") String sortField, @Param("sortDir") String sortDir */) {
+		List<Brand> listOfBrands = brandService.listAllBrands();
 		Product product = new Product();
 
 		product.setEnabled(true);
 		product.setInStock(true);
-		List<Brand> listOfBrands = brandService.listAllBrands();
 
 		Integer noOfExistingExtraImages = product.getImages().size() + 1;
 		for (int i = 0; i < 10; i++)
-			System.out.println(noOfExistingExtraImages);
+			System.out.println(listOfBrands);
 
 		model.addAttribute("pageTitle", "Create New Product");
 		model.addAttribute("listOfBrands", listOfBrands);
 
-		model.addAttribute("pageNumber", 1);
-		model.addAttribute("sortField", sortField);
-		model.addAttribute("sortDir", sortDir);
+		// model.addAttribute("pageNumber", 1);
+		/*
+		 * model.addAttribute("sortField", sortField); model.addAttribute("sortDir",
+		 * sortDir);
+		 */
 		model.addAttribute("product", product);
 		model.addAttribute("noOfExistingExtraImages", noOfExistingExtraImages);
 
@@ -179,30 +177,45 @@ public class ProductController {
 
 		if (!loggedUser.hasRole("admin") && !loggedUser.hasRole("Editor")) {
 			if (loggedUser.hasRole("SalesPersion")) {
-				productService.saveProductPrice(product);
-				redirectAttributes.addFlashAttribute("message", "The product has been saved successfully.");
+				try {
+					productService.saveProductPrice(product);
+					redirectAttributes.addFlashAttribute("message", "The product has been saved successfully.");
+				} catch (Exception e) {
+					e.printStackTrace();
+					redirectAttributes.addFlashAttribute("messageType", "error");
+					redirectAttributes.addFlashAttribute("message", e.getMessage());
+				}
 				// return "redirect:/products";
 				return "redirect:/products/page/1?sortField=name&sortDir=asc";
 			}
 		}
 
-		for (int i = 0; imageIDs != null && i < imageIDs.length; i++) {
-			System.out.println("----> " + imageIDs[i] + "  " + imageNames[i]);
-		}
+		/*
+		 * for (int i = 0; imageIDs != null && i < imageIDs.length; i++) {
+		 * System.out.println("----> " + imageIDs[i] + "  " + imageNames[i]); }
+		 */
 
 		ProductSaveHelper.setMainImageName(mainImageMultipart, product);
 		ProductSaveHelper.setExistingExtraImageNames(imageIDs, imageNames, product);
 		ProductSaveHelper.setNewExtraImageNames(extraImageMultiparts, product);
 		ProductSaveHelper.setProductDetails(detailIDs, detailNames, detailValues, product);
 
-		Product savedProduct = productService.save(product);
+		Product savedProduct = null;
+		try {
+			savedProduct = productService.save(product);
 
-		ProductSaveHelper.deleteExtraImagesWereRemovedOnForm(product);
+			ProductSaveHelper.deleteExtraImagesWereRemovedOnForm(product);
 
-		ProductSaveHelper.saveUploadImages(mainImageMultipart, extraImageMultiparts, savedProduct);
+			ProductSaveHelper.saveUploadImages(mainImageMultipart, extraImageMultiparts, savedProduct);
 
-		redirectAttributes.addFlashAttribute("message", "the product has been saved successfully");
-		// return "redirect:/products";
+			redirectAttributes.addFlashAttribute("message", "the product has been saved successfully");
+			// return "redirect:/products";
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			redirectAttributes.addFlashAttribute("messageType", "error");
+			redirectAttributes.addFlashAttribute("message", e.getMessage());
+		}
 
 		return "redirect:/products/page/1?sortField=name&sortDir=asc";
 	}
@@ -211,12 +224,22 @@ public class ProductController {
 	public String updateProductEnabledStatus(@PathVariable("id") Integer id, @Param("enabled") boolean enabled,
 			RedirectAttributes redirectAttributes) {
 
-		productService.updateProductEnabledStatus(id, enabled);
-		String status = enabled ? "Enabled" : "Disabled";
-		String message = "The Product Id " + id + " has been " + status;
-		redirectAttributes.addFlashAttribute("message", message);
+		try {
+			productService.updateProductEnabledStatus(id, enabled);
 
-		return "redirect:/products";
+			String status = enabled ? "Enabled" : "Disabled";
+			String message = "The Product Id " + id + " has been " + status;
+			// redirectAttributes.addFlashAttribute("messageType", "success");
+			redirectAttributes.addFlashAttribute("message", message);
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			redirectAttributes.addFlashAttribute("messageType", "error");
+			redirectAttributes.addFlashAttribute("message", e.getMessage());
+		}
+
+		//return "redirect:/products";
+		return defaultRedirectURL;
 	}
 
 	@GetMapping("/products/delete/{id}")
@@ -224,18 +247,29 @@ public class ProductController {
 			RedirectAttributes redirectAttributes) {
 		try {
 			productService.delete(id);
-			String productExtraImagesDir = "../product-images/" + id + "/extras";
-			String productImagesDir = "../product-images/" + id;
+			/*
+			 * String productExtraImagesDir = "../product-images/" + id + "/extras"; String
+			 * productImagesDir = "../product-images/" + id;
+			 * 
+			 * FileUploadUtil.removeDir(productExtraImagesDir);
+			 * FileUploadUtil.removeDir(productImagesDir);
+			 */
 
-			FileUploadUtil.removeDir(productExtraImagesDir);
-			FileUploadUtil.removeDir(productImagesDir);
+			//String productExtraImagesDir = "product-images/" + id + "/extras";
+			String productImagesDir = "product-images/" + id;
+
+			AmazonS3Util.removeFolder(productImagesDir);
+			// AmazonS3Util.removeFolder(productExtraImagesDir);
 
 			redirectAttributes.addFlashAttribute("message", "The Product ID " + id + " has been deleted successfully");
 		} catch (Exception e) {
 			// TODO: handle exception
-			redirectAttributes.addFlashAttribute("message", e.getMessage());
+			e.printStackTrace();
+			redirectAttributes.addFlashAttribute("messageType", "error");
+			redirectAttributes.addFlashAttribute("message", "you might not delete Orderd Products.");
 		}
-		return "redirect:/products";
+		//return "redirect:/products";
+		return defaultRedirectURL;
 	}
 
 	@GetMapping("/products/edit/{id}")
@@ -256,8 +290,10 @@ public class ProductController {
 			return "product/product_form";
 
 		} catch (com.shopme.common.exception.ProductNotFoundException e) {
+			ra.addFlashAttribute("messageType", "error");
 			ra.addFlashAttribute("message", e.getMessage());
-			return "redirect:/products";
+			//return "redirect:/products";
+			return defaultRedirectURL;
 		}
 	}
 
@@ -270,9 +306,11 @@ public class ProductController {
 			return "product/product_detail_modal";
 
 		} catch (com.shopme.common.exception.ProductNotFoundException e) {
+			ra.addFlashAttribute("messageType", "error");
 			ra.addFlashAttribute("message", e.getMessage());
 
-			return "redirect:/products";
+			//return "redirect:/products";
+			return defaultRedirectURL;
 		}
 	}
 

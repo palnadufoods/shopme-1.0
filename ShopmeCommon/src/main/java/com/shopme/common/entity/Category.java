@@ -15,6 +15,8 @@ import javax.persistence.OrderBy;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
+import com.shopme.common.Constants;
+
 @Entity
 @Table(name = "categories")
 public class Category {
@@ -44,6 +46,12 @@ public class Category {
 	private Set<Category> children = new HashSet<>();
 
 	public Category() {
+	}
+
+	public Category(String name) {
+		this.name = name;
+		this.alias = name;
+		this.image = "default.png";
 	}
 
 	public Category(String name, String alias, String image) {
@@ -150,7 +158,7 @@ public class Category {
 	public String getPhotosImagePath() {
 		if (id == null)
 			return "/images/image-thumbnail.png";
-		return "/category-images/" + this.id + "/" + this.image;
+		return Constants.S3_BASE_URI+"/category-images/" + this.id + "/" + this.image;
 	}
 
 	@Transient

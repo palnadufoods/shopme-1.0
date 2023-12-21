@@ -1,0 +1,23 @@
+
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Redirect Page</title>
+</head>
+<body onload="submitForm()">
+
+    <form id="redirectForm" th:action="@{/place_order}" method="post">
+        <input type="hidden" name="paymentMethod" value="PHONEPE">
+    </form>
+
+    <script type="text/javascript">
+    	contextPath = "[[@{/}]]";
+        function submitForm() {
+            document.getElementById('redirectForm').submit();
+        }
+    </script>
+</body>
+</html>

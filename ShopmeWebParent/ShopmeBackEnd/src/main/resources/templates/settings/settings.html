@@ -24,6 +24,10 @@
 					href="#countries" role="tab">Countries</a></li>
 				<li class="nav-item"><a class="nav-link" data-toggle="tab"
 					href="#states" role="tab">States</a></li>
+					
+				<li class="nav-item"><a class="nav-link" data-toggle="tab"
+					href="#cities" role="tab">Cities</a></li>
+						
 				<li class="nav-item"><a class="nav-link" data-toggle="tab"
 					href="#mailServer" role="tab">Mail Server</a></li>
 				<li class="nav-item"><a class="nav-link" data-toggle="tab"
@@ -41,6 +45,9 @@
 				</div>
 				<div class="tab-pane p-3" id="states" role="tabpanel">
 					<div th:replace="settings/states :: content"></div>
+				</div>
+				<div class="tab-pane p-3" id="cities" role="tabpanel">
+					<div th:replace="settings/cities :: content"></div>
 				</div>
 				<div class="tab-pane p-3" id="mailServer" role="tabpanel">
 					<div th:replace="settings/mail_server :: content"></div>
@@ -83,5 +90,6 @@
 	<script th:src="@{/js/common_form.js}"></script>
 	<script th:src="@{/js/countries_setting.js}"></script>
 	<script th:src="@{/js/states_setting.js}"></script>
+	<script th:src="@{/js/cities_setting.js}"></script>
 </body>
 </html>

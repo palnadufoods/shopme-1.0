@@ -16,6 +16,8 @@ import javax.persistence.ManyToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
+import com.shopme.common.Constants;
+
 @Entity
 @Table(name = "users")
 public class User {
@@ -134,7 +136,7 @@ public class User {
 	public String getPhotosImagePath() {
 		if (id == null || photos == null)
 			return "/images/default-user.png";
-		return "/user-photos/" + this.id + "/" + this.photos;
+		return Constants.S3_BASE_URI+"/user-photos/" + this.id + "/" + this.photos;
 	}
 
 	@Transient

@@ -14,6 +14,7 @@ import com.shopme.common.entity.Country;
 import com.shopme.common.entity.Customer;
 import com.shopme.common.exception.CustomerNotFoundException;
 import com.shopme.setting.CountryRepository;
+import com.shopme.setting.StateRepository;
 
 import net.bytebuddy.utility.RandomString;
 
@@ -22,6 +23,7 @@ import net.bytebuddy.utility.RandomString;
 public class CustomerService {
 
 	@Autowired private CountryRepository countryRepo;
+	@Autowired private StateRepository stateRepository;
 	@Autowired private CustomerRepository customerRepo;
 	@Autowired PasswordEncoder passwordEncoder;
 	
@@ -89,6 +91,26 @@ public class CustomerService {
 		customer.setPhoneNumber("");
 		customer.setPostalCode("");
 		customer.setCountry(countryRepo.findByCode(countryCode));
+		
+		if(customer.getAddressLine1().isEmpty()|| customer.getAddressLine1().isBlank()) {
+			customer.setAddressLine1("Unknown");
+		}
+		if(customer.getPhoneNumber().isBlank()||customer.getPhoneNumber().isEmpty()) {
+			customer.setAddressLine1("-");
+		}
+		if(customer.getCountry()==null) {
+			customer.setCountry(countryRepo.findByCode("IN"));
+			customer.setState(stateRepository.findByNameLike("Telangana").getName());
+			//stateRepository.fin
+			//customer.setState(
+		}
+		if(customer.getCity().isBlank()||customer.getCity().isEmpty()) {
+			customer.setCity("-");
+		}
+		
+		if(customer.getState().isBlank()||customer.getState().isEmpty()) {
+			customer.setState("unkown");
+		}
 		
 		customerRepo.save(customer);
 	}	

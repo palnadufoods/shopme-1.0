@@ -26,10 +26,10 @@
 		th:href="@{'/{url}/page/{cp}?sortField={sf}&sortDir={sd}&keyword={kw}' + ${categoryId != null ? '&categoryId=' + categoryId : ''} (url=${modU},cp=${currentPage},sf=${fieldName},sd=${sortDir=='asc' ? 'dsc' : 'asc' },kw=${keyword} )}">
 			[[${labelName}]] </a> <span th:if="${sortField==fieldName}"
 		th:class="${sortDir=='asc'? 'fas fa-sort-up':'fas fa-sort-down'}">
-
 	</span></th>
 
-	<!-- Uncomment this if column_link if error encounters  -->>
+	<!-- Uncomment this if column_link if error encounters  -->
+	>
 	<!-- <th th:fragment="column_link(fieldName,labelName,removeTag)"
 		th:remove="${removeTag}"><a class="text-white"
 		th:href="@{/users/page/{cp}?sortField={sf}&sortDir={sd}&keyword={kw} (cp=${currentPage},sf=${fieldName},sd=${sortDir=='asc' ? 'dsc' : 'asc' },kw=${keyword} )}">
@@ -47,7 +47,11 @@
 	<a th:fragment="page_link(URL,cp,labelName)" class="page-link"
 		th:href="@{'/{url}/page/{inum}?sortField={sf}&sortDir={sd}'+${keyword != null && keyword !='' ? '&keyword=' + keyword : ''} + ${categoryId != null ? '&categoryId=' + categoryId : ''} (url=${URL},inum=${cp}, sf=${sortField},sd=${sortDir} )  }">[[${labelName}]]
 	</a>
-
+	
+	<!--  this page link is used for customers page -->>
+	<a th:fragment="page_link_generic(pageNum, label)" class="page-link"
+		th:href="@{${moduleURL} + '/page/' + ${pageNum} + '?sortField=' + ${sortField} + '&sortDir=' + ${sortDir} + ${keyword != null ? '&keyword=' + keyword : ''} + ${categoryId != null ? '&categoryId=' + categoryId : ''}}">[[${label}]]</a>
+	
 
 
 	<!--  Customers listing updates needs to be optimized for others listings -->
@@ -59,9 +63,7 @@
 		th:class="${sortDir == 'asc' ? 'fas fa-sort-up' : 'fas fa-sort-down'}"></span>
 	</th>
 
-	<a th:fragment="page_link(pageNum, label)" class="page-link"
-		th:href="@{${moduleURL} + '/page/' + ${pageNum} + '?sortField=' + ${sortField} + '&sortDir=' + ${sortDir} + ${keyword != null ? '&keyword=' + keyword : ''} + ${categoryId != null ? '&categoryId=' + categoryId : ''}}">[[${label}]]</a>
-
+	
 	<div th:fragment="user_photos" th:remove="tag">
 		<span th:if="${user.photos == null}"
 			class="fas fa-portrait fa-3x icon-silver"></span> <img
@@ -72,25 +74,25 @@
 	<div th:fragment="status(enabled, entityName, entityURL)"
 		th:remove="tag">
 		<a th:if="${enabled == true}"
-			class="fas fa-check-circle fa-2x icon-green"
+			class="fas fa-check-circle icon-green"
 			th:href="@{${entityURL} + '/enabled/false'}"
 			th:title="'Disable this ' + ${entityName}"></a> <a
-			th:if="${enabled == false}" class="fas fa-circle fa-2x icon-dark"
+			th:if="${enabled == false}" class="fas fa-circle icon-dark"
 			th:href="@{${entityURL} + '/enabled/true'}"
 			th:title="'Enable this ' + ${entityName}"></a>
 	</div>
 
 	<div th:fragment="edit(entityName, editURL)" th:remove="tag">
-		<a class="fas fa-edit fa-2x icon-green" th:href="@{${editURL}}"
-			th:title="'Edit this ' + ${entityName}"></a>
+		<a class="fa-solid fa-pen-to-square icon-green"
+			th:href="@{${editURL}}" th:title="'Edit this ' + ${entityName}"></a>
 	</div>
+
 
 	<div th:fragment="delete(entityName, entityId, deleteURL, visible)"
 		th:remove="tag">
 		<th:block th:if="${visible}">
-			<a class="fas fa-trash fa-2x icon-dark link-delete"
-				th:href="@{${deleteURL}}" th:entityId="${entityId}"
-				th:title="'Delete this ' + ${entityName}"></a>
+			<a class="fa-solid fa-trash icon-red" th:href="@{${deleteURL}}"
+				th:entityId="${entityId}" th:title="'Delete this ' + ${entityName}"></a>
 		</th:block>
 	</div>
 
@@ -108,32 +110,34 @@
 				<ul class="pagination justify-content-center flex-wrap">
 					<li
 						th:class="${currentPage > 1 ? 'page-item' : 'page-item disabled'}">
-						<a th:replace="fragments :: page_link(1, 'First')"></a>
+						<a th:replace="fragments :: page_link_generic(1, 'First')"></a>
 					</li>
 					<li
 						th:class="${currentPage > 1 ? 'page-item' : 'page-item disabled'}">
 						<a
-						th:replace="fragments :: page_link(${currentPage - 1}, 'Previous')"></a>
+						th:replace="fragments :: page_link_generic(${currentPage - 1}, 'Previous')"></a>
 					</li>
 
 					<li
 						th:class="${currentPage != i ? 'page-item': 'page-item active'}"
 						th:each="i : ${#numbers.sequence(1, totalPages)}"><a
-						th:replace="fragments :: page_link(${i}, ${i})"></a></li>
+						th:replace="fragments :: page_link_generic(${i}, ${i})"></a></li>
 
 					<li
 						th:class="${currentPage < totalPages ? 'page-item' : 'page-item disabled'}">
-						<a th:replace="fragments :: page_link(${currentPage + 1}, 'Next')"></a>
+						<a th:replace="fragments :: page_link_generic(${currentPage + 1}, 'Next')"></a>
 					</li>
 
 					<li
 						th:class="${currentPage < totalPages ? 'page-item' : 'page-item disabled'}">
-						<a th:replace="fragments :: page_link(${totalPages}, 'Last')"></a>
+						<a th:replace="fragments :: page_link_generic(${totalPages}, 'Last')"></a>
 					</li>
 				</ul>
 			</nav>
 		</div>
 	</div>
+
+
 
 
 	<div th:fragment="search_form_and_message()">
