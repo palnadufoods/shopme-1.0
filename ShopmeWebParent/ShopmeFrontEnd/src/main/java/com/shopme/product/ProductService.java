@@ -14,7 +14,7 @@ import com.shopme.common.exception.ProductNotFoundException;
 @Service
 public class ProductService {
 
-	public static final int PRODUCTS_PER_PAGE = 10;
+	public static final int PRODUCTS_PER_PAGE = 20;
 	public static final int SEARCH_RESULTS_PER_PAGE = 10;
 	@Autowired
 	private ProductRepository repo;
@@ -47,4 +47,10 @@ public class ProductService {
 		Pageable pageable = PageRequest.of(pageNum - 1, SEARCH_RESULTS_PER_PAGE);
 		return repo.search(keyword, pageable);
 	}
+
+	// create a method for serching products based on  the keyword like key word substring , keyword matches , keyword charecters in a word etc
+	
+
 }
+
+
