@@ -8,9 +8,9 @@ spring:
     password: ${DATABASE_PASSWORD}
     url: ${DATABASE_URL}
     username: ${DATABASE_USERNAME}
-    hikari:
-      minimum-idle: 1
-      maximum-pool-size: 2
+    #hikari:
+      #minimum-idle: 1
+      #maximum-pool-size: 2
   jpa:
     hibernate:
       ddl-auto: update

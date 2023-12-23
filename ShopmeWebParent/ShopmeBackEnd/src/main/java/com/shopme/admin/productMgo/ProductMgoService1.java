@@ -3,17 +3,17 @@ package com.shopme.admin.productMgo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.shopme.common.ProductMgo.ProductMgoRepository;
-import com.shopme.common.ProductMgo.repo0.ProductMgoRepository0;
-import com.shopme.common.ProductMgo.repo1.ProductMgoRepository1;
-import com.shopme.common.ProductMgo.repo2.ProductMgoRepository2;
-import com.shopme.common.ProductMgo.repo3.ProductMgoRepository3;
-import com.shopme.common.ProductMgo.repo4.ProductMgoRepository4;
-import com.shopme.common.ProductMgo.repo5.ProductMgoRepository5;
-import com.shopme.common.ProductMgo.repo6.ProductMgoRepository6;
-import com.shopme.common.ProductMgo.repo7.ProductMgoRepository7;
-import com.shopme.common.ProductMgo.repo8.ProductMgoRepository8;
-import com.shopme.common.ProductMgo.repo9.ProductMgoRepository9;
+import com.shopme.admin.ProductMgoRepos.ProductMgoRepository;
+import com.shopme.admin.ProductMgoRepos.repo0.ProductMgoRepository0;
+import com.shopme.admin.ProductMgoRepos.repo1.ProductMgoRepository1;
+import com.shopme.admin.ProductMgoRepos.repo2.ProductMgoRepository2;
+import com.shopme.admin.ProductMgoRepos.repo3.ProductMgoRepository3;
+import com.shopme.admin.ProductMgoRepos.repo4.ProductMgoRepository4;
+import com.shopme.admin.ProductMgoRepos.repo5.ProductMgoRepository5;
+import com.shopme.admin.ProductMgoRepos.repo6.ProductMgoRepository6;
+import com.shopme.admin.ProductMgoRepos.repo7.ProductMgoRepository7;
+import com.shopme.admin.ProductMgoRepos.repo8.ProductMgoRepository8;
+import com.shopme.admin.ProductMgoRepos.repo9.ProductMgoRepository9;
 import com.shopme.common.entity.Product;
 import com.shopme.common.entity.mongo.ProductMgo;
 
