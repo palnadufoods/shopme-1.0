@@ -1,12 +1,16 @@
 package com.shopme.setting;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.shopme.common.entity.City;
+import com.shopme.common.entity.CityDTO;
 import com.shopme.common.entity.Currency;
+import com.shopme.common.entity.State;
 import com.shopme.common.entity.setting.Setting;
 import com.shopme.common.entity.setting.SettingCategory;
 
@@ -14,6 +18,13 @@ import com.shopme.common.entity.setting.SettingCategory;
 public class SettingService {
 	@Autowired
 	private SettingRepository settingRepo;
+	
+	@Autowired
+	private CityRepository cityRepository;
+	
+	@Autowired
+	private StateRepository stateRepository;
+	
 	@Autowired
 	private CurrencyRepository currencyRepo;
 
@@ -44,5 +55,18 @@ public class SettingService {
 		Currency currency = currencyRepo.findById(currencyId).get();
 
 		return currency.getCode();
+	}
+	
+	public List<CityDTO> listCitiesByState(String stateStr){
+		
+		State state= stateRepository.findByName(stateStr);
+		List<City> cities = cityRepository.findByStateOrderByNameAsc(state);
+		
+		List<CityDTO> citiesDto=new ArrayList<>();
+		
+		for(City city:cities) {
+			citiesDto.add(new CityDTO(city.getId(), city.getName()));
+		}
+		return citiesDto;
 	}
 }

@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragments :: page_head('Shopping Cart', 'none')" />
+<body>
+<div class="container-fluid">
+	<div th:replace="navigation :: header_menu"></div>
+	<div th:replace="navigation :: search_nav"></div>
+
+	<div class="text-center">
+		<h2>Checkout</h2>
+	</div>
+	
+	<div class="row m-1">
+		<div class="col-sm-8">
+			<div class="card">
+				<div class="card-header"><h5>Shipping information</h5></div>
+				<div class="card-body">
+					<p>
+						<b>Ship to:</b>&nbsp; [[${shippingAddress}]]
+						<a th:href="@{/address_book(redirect=checkout)}">[Ship to another address]</a>
+					</p>
+					<p>
+						<b>Days to deliver: </b>[[${checkoutInfo.deliverDays}]] day(s)
+					</p>
+					<p>
+						<b>Expected deliver date: </b>[[${#dates.format(checkoutInfo.deliverDate, 'E, dd MMM yyyy')}]]
+					</p>
+				</div>
+			</div>		
+			
+			<div class="card mt-3 mb-3">
+				<div class="card-header"><h5>Payment Method</h5></div>
+				<div class="card-body">
+					<div th:if="${checkoutInfo.codSupported}">
+						<form th:action="@{/place_order}" method="post">
+						<p>
+						
+							<input type="radio" name="paymentMethod" id="radioCOD" value="COD" /> Cash on Delivery (COD)
+							&nbsp;
+							<button class="btn btn-primary d-none" type="submit" id="buttonSubmit">Place Order with COD</button>
+						</p>
+						</form>
+					</div>
+					
+					<div id="paypal-button-container"></div>
+					<form th:action="@{/process_paypal_order}" method="post" id="paypalForm">
+						<input type="hidden" name="orderId" id="orderId" />
+						<input type="hidden" name="paymentMethod" value="PAYPAL" />
+					</form>
+				</div>
+				
+				<div class="card-body">
+					<form th:action="@{/initiate-payment}" method="GET">
+					<button class="success" id="payWithPhonePe1"> Pay With Phonepe</button>
+					</form>
+					
+				</div>
+							
+			</div>
+		</div>
+		
+		<div class="col-sm-4">
+			<div class="card">
+				<div class="card-header"><h5>Order Summary</h5></div>
+				<div class="card-body">
+					<div>
+					<table>
+						<th:block th:each="item : ${cartItems}">
+						<tr th:with="product = ${item.product}">
+							<td>[[${item.quantity}]] X &nbsp;&nbsp;</td>
+							<td width="70%">
+								<a th:href="@{'/p/' + ${product.alias}}" target="_blank">
+									[[${product.shortName}]]
+								</a>
+								<br/>
+								<small>Ship: <div th:replace="fragments :: format_currency(${item.shippingCost})"></div></small>
+							</td>
+							<td>
+								<div th:replace="fragments :: format_currency(${item.subtotal})">
+							</td>
+						</tr>
+						</th:block>
+						<tr><td colspan="3"><hr/></tr>
+					</table>
+					</div>
+					
+					<div class="row mt-2">
+						<div class="col">Product Total: </div>
+						<div class="col"><div th:replace="fragments :: format_currency(${checkoutInfo.productTotal})"></div></div>
+					</div>
+					
+					<div class="row mt-2">
+						<div class="col">Shipping Total: </div>
+						<div class="col"><div th:replace="fragments :: format_currency(${checkoutInfo.shippingCostTotal})"></div></div>
+					</div>
+							
+					<div class="row mt-2">
+						<div class="col">Payment Total: </div>
+						<div class="col"><b><div th:replace="fragments :: format_currency(${checkoutInfo.paymentTotal})"></div></b></div>
+					</div>										
+				</div>
+			</div>		
+		</div>		
+	</div>
+	
+	<div th:replace="fragments :: modal_dialog"></div>
+	<div th:replace="navigation :: footer_menu"></div>
+</div>
+<script th:src="@{https://www.paypal.com/sdk/js(client-id=${paypalClientId},currency=${currencyCode})}"></script>
+<script type="text/javascript" th:src="@{/js/common_modal.js}"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.9-1/crypto-js.js"></script>
+<script src="https://mercury.phonepe.com/web/bundle/checkout.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<script type="text/javascript">
+	contextPath = "[[@{/}]]";
+	var csrfHeaderName = "[[${_csrf.headerName}]]";
+	var csrfValue = "[[${_csrf.token}]]";
+	
+	$(document).ready(function() {
+		$("#radioCOD").on("click", function() {
+			$("#buttonSubmit").removeClass("d-none");
+		});
+		
+		$("#payWithPhonePe").on("click",function(){
+			IntiatePhonePeTransaction();
+		});
+		
+		
+	});
+	
+	function validateOrder(orderId) {
+		$("#orderId").val(orderId);
+		$("#paypalForm").submit();
+	}
+	
+	paypal.Buttons({
+		enableStandardCardFields: true,
+		createOrder: function(data, actions) {
+			// setup a transaction
+			return actions.order.create({
+				
+				intent: 'CAPTURE', // make payment immediately
+				payer: {
+					name: {
+					given_name: "[[${customer.firstName}]]",
+					surname: "[[${customer.lastName}]]"
+					},
+				
+					address: {
+						address_line_1: "[[${customer.addressLine1}]]",
+						address_line_2: "[[${customer.addressLine2}]]",
+						admin_area_1: "[[${customer.state}]]",
+						admin_area_2: "[[${customer.city}]]",
+						postal_code: "[[${customer.postalCode}]]",
+						country_code: "[[${customer.country.code}]]"
+					},
+					
+					email_address: "[[${customer.email}]]",
+					
+					phone: {
+						phone_type: "MOBILE",
+						phone_number: {
+							national_number: "[[${customer.phoneNumber}]]"
+						}
+					}
+				},
+				
+				purchase_units: [{
+					amount: {
+						value: "[[${checkoutInfo.paymentTotal4PayPal}]]",
+						currency_code: "[[${currencyCode}]]"
+					}
+				}],
+				
+				application_context: {
+					shipping_preference: "NO_SHIPPING"
+				}
+			});
+		},
+		
+		onApprove: function(data, actions) {
+			// buyer approved payment
+			return actions.order.capture().then(function(details) {
+				//console.log(details);
+				orderId = details.id;
+				validateOrder(orderId);				
+			});
+		},
+		
+		onCancel: function(data) {
+			// buyer cancelled payment
+			alert('Payment cancelled by the buyer');
+		},
+		
+		onError: function(err) {
+			// error that prevents buyer from doing checkout
+			showErrorModal("Something wrong with your address information, so payment will not work.");
+		}
+	}).render("#paypal-button-container");
+	
+	
+	function IntiatePhonePeTransaction(){	   
+	    
+	 // Sample request payload
+	    const payload = {
+	      "merchantId": "PGTESTPAYUAT",
+	      "merchantTransactionId": "MT7850590068188104",
+	      "merchantUserId": "MUID123",
+	      "amount": 10000,
+	      "redirectUrl": "http://localhost:8083/Shopme/payment/callback",
+	      "redirectMode": "POST", //REDIRECT or POST
+	      "callbackUrl": "http://localhost:8083/Shopme/payment/callback",
+	      "mobileNumber": "9999999999",
+	      "paymentInstrument": {
+	        "type": "PAY_PAGE"
+	      }
+	    };
+	 	
+	 // Convert JSON payload to base64
+	    const base64Payload = btoa(JSON.stringify(payload));
+	 
+	 // Create the request object
+	    const requestObject = {
+	      request: base64Payload
+	    };
+
+	    // Sample Salt Key and Salt Index
+	    const saltKey = "099eb0cd-02cf-4e2a-8aca-3e6c6aff0399";
+	    const saltIndex = 1;
+
+	    // Concatenate the base64 payload, "/pg/v1/pay", salt key, and salt index
+	    // base64Payload is request
+	    const concatenatedString = base64Payload + "/pg/v1/pay" + saltKey;
+	    
+	    
+	    // Generate SHA256 hash
+	    const hash = CryptoJS.SHA256(concatenatedString).toString(CryptoJS.enc.Hex);
+
+	    console.log('SHA256 hash:', hash);
+	    
+	 // Final result
+	    const xVerifyHeaderValue  = `${hash}###${saltIndex}`;
+	    console.log("Base64 Encoded Payload:", base64Payload);
+	    console.log("Checksum Value:", xVerifyHeaderValue);
+	    
+	    // UAT PAY API URL
+	    const apiUrl = 'https://api-preprod.phonepe.com/apis/pg-sandbox/pg/v1/pay';
+	    
+	    
+	    axios.post('https://api-preprod.phonepe.com/apis/pg-sandbox/pg/v1/pay', {
+	        'request': base64Payload
+	      }, {
+	        headers: {
+	          'Content-Type': 'application/json',
+	          'X-VERIFY': xVerifyHeaderValue,
+	          'accept': 'application/json'
+	        }
+	      }).then(function (response) {
+	    	  console.log(response);
+	    	  console.log(response.data.data.instrumentResponse.redirectInfo.url);
+	    	  window.location.href=response.data.data.instrumentResponse.redirectInfo.url;
+	        //res.redirect(response.data.data.instrumentResponse.redirectInfo.url);
+	      }).catch(function (error) {
+	        //res.render('index', { page_respond_data: JSON.stringify(error) });
+	    	  console.log(err);
+	      });
+	    
+	    
+	    // Send POST request
+	   /*  fetch(apiUrl, {
+	      method: 'POST',
+	      mode: 'no-cors',
+	      headers: {
+	    	'accept': 'application/json',
+	        'Content-Type': 'application/json',
+	        'X-VERIFY': xVerifyHeaderValue,
+	      },
+	      body: JSON.stringify(requestObject),
+	    })
+	    .then(response => response.json())
+	    .then(data => {
+	      console.log('Response:', data);
+	    })
+	    .catch(error => {
+	      console.error('Error:', error);
+	    }); */
+
+	}
+</script>
+</body>
+</html>	

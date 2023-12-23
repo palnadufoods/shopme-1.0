@@ -14,9 +14,12 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.shopme.ControllerHelper;
 import com.shopme.common.entity.Address;
+import com.shopme.common.entity.CityDTO;
 import com.shopme.common.entity.Country;
 import com.shopme.common.entity.Customer;
+import com.shopme.common.entity.State;
 import com.shopme.customer.CustomerService;
+import com.shopme.setting.StateRepository;
 
 @Controller
 public class AddressController {
@@ -24,6 +27,7 @@ public class AddressController {
 	@Autowired private AddressService addressService;
 	@Autowired private CustomerService customerService;
 	@Autowired private ControllerHelper controllerHelper;
+	@Autowired private StateRepository stateRepository;
 	
 	@GetMapping("/address_book")
 	public String showAddressBook(Model model, HttpServletRequest request) {
@@ -81,10 +85,17 @@ public class AddressController {
 		Customer customer = controllerHelper.getAuthenticatedCustomer(request);
 		List<Country> listCountries = customerService.listAllCountries();
 		
+		
 		Address address = addressService.get(addressId, customer.getId());
-
+		
+		List<State> listStates = stateRepository.findByCountryOrderByNameAsc(address.getCountry());
+		
+		List<CityDTO> listCities = addressService.listCitiesByState(address.getState());
+		
 		model.addAttribute("address", address);
 		model.addAttribute("listCountries", listCountries);
+		model.addAttribute("listStates", listStates);
+		model.addAttribute("listCities",listCities);
 		model.addAttribute("pageTitle", "Edit Address (ID: " + addressId + ")");
 		
 		return "address_book/address_form";

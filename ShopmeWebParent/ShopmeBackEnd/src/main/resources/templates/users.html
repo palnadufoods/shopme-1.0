@@ -89,22 +89,40 @@
 						<td>[[${user.roles}]]</td>
 
 
-						<td><a th:if="${user.enabled==true}"
+						<td>
+							<!-- 			<a th:if="${user.enabled==true}"
 							th:href="@{/users/enable/{pageNum}/{id}/false(pageNum=${currentPage},id=${user.id}) }"
 							class="fa-solid fa-circle-check icon-green" title="Disable User"></a>
 
 							<a th:if="${user.enabled!=true}"
 							th:href="@{/users/enable/{pageNum}/{id}/true(pageNum=${currentPage},id=${user.id}) }"
-							class="fa-solid fa-circle icon-silver" title="Enable User"></a></td>
+							class="fa-solid fa-circle icon-silver" title="Enable User"></a> -->
+
+							<div
+								th:replace="fragments :: status(${user.enabled}, 'user', '/users/' + ${user.id})" />
+
+						</td>
 
 
-						<td><a class="fa-solid fa-pen-to-square icon-green"
+						<td>
+							<!-- 	<a class="fa-solid fa-pen-to-square icon-green"
 							th:href="@{/users/edit/{pageNum}/{id}?sortField={sf}&sortDir={sd}&keyword={kw} (sf=${sortField},sd=${sortDir},kw=${keyword},pageNum=${currentPage},id=${user.id}) }"
 							title="Edit The User"> </a> &nbsp; <a
 							class="fa-solid fa-trash link-delete icon-red"
 							th:fname="${user.firstName}" th:id="${user.id}"
 							th:href="@{/users/delete/{pageNum}/{id}?sortField={sf}&sortDir={sd}&keyword={kw} (sf=${sortField},sd=${sortDir},kw=${keyword},pageNum=${currentPage},id=${user.id}) }"
-							title="Delete The User"> </a></td>
+							title="Delete The User"> </a> -->
+
+							<div
+								th:replace="fragments :: edit('user', '/users/edit/' + ${user.id})" />
+							&nbsp;&nbsp;
+
+
+
+							<div
+								th:replace="fragments :: delete('user', ${user.id}, '/users/delete/' + ${user.id}, true)" />
+
+						</td>
 
 					</tr>
 
@@ -124,21 +142,35 @@
 				<div class="col-8">
 					<div>[[${user.getFullName}]]</div>
 					<div>[[${user.roles}]]</div>
+
 					<div class="mt-2">
-						<a th:if="${user.enabled==true}"
+
+						<!-- <a th:if="${user.enabled==true}"
 							th:href="@{/users/enable/{pageNum}/{id}/false(pageNum=${currentPage},id=${user.id}) }"
 							class="fa-solid fa-circle-check icon-green" title="Disable User"></a>
 
 						<a th:if="${user.enabled!=true}"
 							th:href="@{/users/enable/{pageNum}/{id}/true(pageNum=${currentPage},id=${user.id}) }"
-							class="fa-solid fa-circle icon-silver" title="Enable User"></a>&nbsp;
-						<a class="fa-solid fa-pen-to-square icon-green"
+							class="fa-solid fa-circle icon-silver" title="Enable User"></a>&nbsp; -->
+
+						<div
+							th:replace="fragments :: status(${user.enabled}, 'user', '/users/' + ${user.id})" />
+
+						<!-- <a class="fa-solid fa-pen-to-square icon-green"
 							th:href="@{/users/edit/{pageNum}/{id}?sortField={sf}&sortDir={sd}&keyword={kw} (sf=${sortField},sd=${sortDir},kw=${keyword},pageNum=${currentPage},id=${user.id}) }"
 							title="Edit The User"> </a> &nbsp; <a
 							class="fa-solid fa-trash link-delete icon-red"
 							th:fname="${user.firstName}" th:id="${user.id}"
 							th:href="@{/users/delete/{pageNum}/{id}?sortField={sf}&sortDir={sd}&keyword={kw} (sf=${sortField},sd=${sortDir},kw=${keyword},pageNum=${currentPage},id=${user.id}) }"
-							title="Delete The User"> </a>
+							title="Delete The User"> </a> -->
+
+						&nbsp;
+						<div
+							th:replace="fragments :: edit('user', '/users/edit/' + ${user.id})" />
+						&nbsp;
+						<div
+							th:replace="fragments :: delete('user', ${user.id}, '/users/delete/' + ${user.id}, true)" />
+
 					</div>
 				</div>
 
@@ -153,12 +185,13 @@
 				[[${totalItems}]]</span>
 		</div>
 
-		<div th:replace="navbarPaging::pagination('users')"></div>
+		<!-- <div th:replace="navbarPaging::pagination('users')"></div> -->
+		<div th:replace="fragments :: pagination('users')"></div>
 		<div th:replace="modal_fragments::confirm-model('Delete User')"></div>
 		<div th:replace="fragments::footer"></div>
 	</div>
 	<script th:src="@{/js/common_list.js}"></script>
-	
+
 	<script type="text/javascript">
 		moduleURL = "[[@{/users}]]";
 		modURL1 = "users";

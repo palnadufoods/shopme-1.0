@@ -14,8 +14,11 @@ import org.springframework.web.bind.annotation.PathVariable;
 import com.shopme.category.CategoryService;
 import com.shopme.common.entity.Category;
 import com.shopme.common.entity.Product;
+import com.shopme.common.entity.mongo.ProductMgo;
 import com.shopme.common.exception.CategoryNotFoundException;
 import com.shopme.common.exception.ProductNotFoundException;
+import com.shopme.productMgo.CustomPage;
+import com.shopme.productMgo.ProductMgoService;
 
 @Controller
 public class ProductController {
@@ -25,6 +28,9 @@ public class ProductController {
 
 	@Autowired
 	private ProductService productService;
+
+	@Autowired
+	private ProductMgoService productMgoService;
 
 	@GetMapping("/c/{category_alias}")
 	public String viewCategoryFirstPage(@PathVariable("category_alias") String alias, Model model) {
@@ -105,19 +111,77 @@ public class ProductController {
 
 	@GetMapping("/search")
 	public String searchFirstPage(String keyword, Model model) {
-		return searchByPage(keyword, 1, model);
+		// return searchByPage(keyword, 1, model);
+		return searchByPageMgo(keyword, 1, model);
 	}
 
-	@GetMapping("/search/page/{pageNum}")
-	public String searchByPage(String keyword, @PathVariable("pageNum") int pageNum, Model model) {
-		Page<Product> pageProducts = productService.search(keyword, pageNum);
-		List<Product> listResult = pageProducts.getContent();
+	@GetMapping("/searchMgo")
+	public String searchFirstPage1(String keyword, Model model) {
+		// return searchByPage(keyword, 1, model);
+		return searchByPageMgo(keyword, 1, model);
+	}
 
-		long startCount = (pageNum - 1) * ProductService.SEARCH_RESULTS_PER_PAGE + 1;
-		long endCount = startCount + ProductService.SEARCH_RESULTS_PER_PAGE - 1;
-		if (endCount > pageProducts.getTotalElements()) {
-			endCount = pageProducts.getTotalElements();
-		}
+	@GetMapping("/mgo")
+	public String findingMgoProducts(Model model) {
+		// List<ProductMgo> pros = productMgoService.getAllProducts();
+		/*
+		 * List<ProductMgo> pros = productMgoService.searchProductsMgo("Guru"); for
+		 * (ProductMgo pro : pros) { System.out.println(pro.getName() + " .......... " +
+		 * pro.getId()); }
+		 */
+
+		return "redirect:/";
+	}
+
+	// Mysql db Call
+
+	/*
+	 * @GetMapping("/search/page/{pageNum}") public String searchByPage(String
+	 * keyword, @PathVariable("pageNum") int pageNum, Model model) { Page<Product>
+	 * pageProducts = productService.search(keyword, pageNum); List<Product>
+	 * listResult = pageProducts.getContent();
+	 * 
+	 * long startCount = (pageNum - 1) * ProductService.SEARCH_RESULTS_PER_PAGE + 1;
+	 * long endCount = startCount + ProductService.SEARCH_RESULTS_PER_PAGE - 1; if
+	 * (endCount > pageProducts.getTotalElements()) { endCount =
+	 * pageProducts.getTotalElements(); }
+	 * 
+	 * model.addAttribute("currentPage", pageNum); model.addAttribute("totalPages",
+	 * pageProducts.getTotalPages()); model.addAttribute("startCount", startCount);
+	 * model.addAttribute("endCount", endCount); model.addAttribute("totalItems",
+	 * pageProducts.getTotalElements()); model.addAttribute("pageTitle", keyword +
+	 * " - Search Result");
+	 * 
+	 * model.addAttribute("keyword", keyword); model.addAttribute("searchKeyword",
+	 * keyword); model.addAttribute("listResult", listResult);
+	 * 
+	 * return "product/search_result"; }
+	 */
+
+	@GetMapping("/searchMgo/page/{pageNum}")
+	public String searchByPageMgo(String keyword, @PathVariable("pageNum") int pageNum, Model model) {
+		// Page<ProductMgo> pageProducts =
+		// productMgoService.searchProductsMgo(keyword,pageNum);
+		// productService.search(keyword, pageNum);
+
+		CustomPage<ProductMgo> pageProducts = productMgoService.searchProductsMgo(keyword, pageNum);
+
+		List<ProductMgo> listResult = pageProducts.getProductsMgo(); // pageProducts.getContent();
+		/*
+		 * for(ProductMgo productMgo:listResult) {
+		 * System.out.println("searchMgo Image test "+ productMgo.toString());
+		 * System.out.println(productMgo.getName() +" searchMgo Image test"+
+		 * productMgo.getMainImage() + "product Name "+ productMgo.getName()); }
+		 */
+
+		/*
+		 * long startCount = (pageNum - 1) * ProductService.SEARCH_RESULTS_PER_PAGE + 1;
+		 * long endCount = startCount + ProductService.SEARCH_RESULTS_PER_PAGE - 1; if
+		 * (endCount > pageProducts.getTotalElements()) { endCount =
+		 * pageProducts.getTotalElements(); }
+		 */
+		long startCount = 1;
+		long endCount = pageProducts.getTotalPages();
 
 		model.addAttribute("currentPage", pageNum);
 		model.addAttribute("totalPages", pageProducts.getTotalPages());
@@ -131,6 +195,7 @@ public class ProductController {
 		model.addAttribute("listResult", listResult);
 
 		return "product/search_result";
+		// return "redirect:/";
 	}
 
 }

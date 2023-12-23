@@ -14,7 +14,14 @@ public class ControllerHelper {
 	private CustomerService customerService;
 
 	public Customer getAuthenticatedCustomer(HttpServletRequest request) {
-		String email = "";// Utility.getEmailOfAuthenticatedCustomer(request);
+		String email = Utility.getEmailOfAuthenticatedCustomer(request);
 		return customerService.getCustomerByEmail(email);
 	}
+	
+	public int getAuthenticatedCustomerId(HttpServletRequest request) {
+		String email = Utility.getEmailOfAuthenticatedCustomer(request);
+		return customerService.getCustomerByEmail(email).getId();
+	}
+	
+	
 }

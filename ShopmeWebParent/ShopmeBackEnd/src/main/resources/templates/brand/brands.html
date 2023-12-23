@@ -21,9 +21,8 @@
 
 		<div>
 			<form th:action="@{/brands/page/1}" class="form-inline m-3">
-				<input type="hidden" name="sortDir" th:value="${sortDir}" />
-				<input type="hidden" name="sortField" th:value="${sortField}" />
-				 <input
+				<input type="hidden" name="sortDir" th:value="${sortDir}" /> <input
+					type="hidden" name="sortField" th:value="${sortField}" /> <input
 					type="search" name="keyword" th:value="${keyword}"
 					class="form-control searchField" placeholder="Search" required>&nbsp;&nbsp;
 
@@ -70,20 +69,29 @@
 							class='badge badge-secondary m-1'>[[${cat}]]</span></td>
 
 						<!-- <td>[[${brand.categories}]]</td> -->
-						<td><a class="fa-solid fa-pen-to-square icon-green"
+						<!-- Edit, Delete the brand -->
+						<!-- <td><a class="fa-solid fa-pen-to-square icon-green"
 							th:href="@{/brands/edit/{id}(id=${brand.id})}"
 							title="Edit The Brand"> </a> &nbsp; <a
 							th:if="${brand.isHasProducts==false}"
 							class="fa-solid fa-trash link-delete icon-red"
 							th:name="${brand.name}" th:id="${brand.id}"
 							th:href="@{/brands/delete/{id} (id=${brand.id})}"
-							title="Delete The Brand"> </a></td>
+							title="Delete The Brand"> </a></td> -->
+
+						<td>
+							<div
+								th:replace="fragments :: edit('brand', '/brands/edit/' + ${brand.id})"></div>
+							&nbsp;
+							<div
+								th:replace="fragments :: delete('brand', ${brand.id}, '/brands/delete/' + ${brand.id}, true)"></div>
+						</td>
 					</tr>
 
 				</tbody>
 			</table>
 		</div>
-		
+
 		<div class="less-details">
 
 			<div th:each="brand:${listOfBrands}" class="row m-1">
@@ -97,14 +105,21 @@
 					<div>[[${brand.name}]]</div>
 					<div class="mt-2">
 
-						<a class="fa-solid fa-pen-to-square icon-green"
+						<div
+							th:replace="fragments :: edit('brand', '/brands/edit/' + ${brand.id})"></div>
+						&nbsp;
+						<div
+							th:replace="fragments :: delete('brand', ${brand.id}, '/brands/delete/' + ${brand.id}, true)"></div>
+
+						<!-- 		<a class="fa-solid fa-pen-to-square icon-green"
 							th:href="@{/brands/edit/{pgNo}/{id} (id=${brand.id}, pgNo=${pageNumber} )}"
 							title="Edit The brand"> </a> &nbsp; <a
 							th:if="${brand.isHasProducts==false}"
 							class="fa-solid fa-trash link-delete icon-red"
 							th:name="${brand.name}" th:id="${brand.id}"
 							th:href="@{/brands/delete/{pgNo}/{id} (id=${brand.id},pgNo=${pageNumber} )}"
-							title="Delete The brand"> </a>
+							title="Delete The brand"> </a> -->
+
 					</div>
 				</div>
 			</div>
@@ -117,13 +132,14 @@
 		</div>
 
 
+		<!-- <div th:replace="navbarPaging::pagination('brands')"></div> -->
 
-		<div th:replace="navbarPaging::pagination('brands')"></div>
+		<div th:replace="fragments :: pagination('brands')"></div>
 		<div th:replace="modal_fragments::confirm-model('Delete brand')"></div>
 		<div th:replace="fragments::footer"></div>
 		<script th:src="@{/js/common_list.js}"></script>
 		<script type="text/javascript">
-		moduleURL = "[[@{/brands}]]";
+			moduleURL = "[[@{/brands}]]";
 			$(document)
 					.ready(
 							function() {

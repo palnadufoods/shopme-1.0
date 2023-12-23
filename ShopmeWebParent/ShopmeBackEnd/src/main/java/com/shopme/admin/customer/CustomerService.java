@@ -18,7 +18,7 @@ import com.shopme.common.exception.CustomerNotFoundException;
 @Service
 @Transactional
 public class CustomerService {
-	public static final int CUSTOMERS_PER_PAGE = 10;
+	public static final int CUSTOMERS_PER_PAGE = 2;
 	
 	@Autowired private CustomerRepository customerRepo;
 	@Autowired private CountryRepository countryRepo;	

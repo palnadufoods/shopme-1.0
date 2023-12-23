@@ -19,6 +19,8 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
+import com.shopme.common.Constants;
+
 /**
  * @author sai
  *
@@ -88,6 +90,17 @@ public class Product {
 	private boolean customerCanReview;
 	@Transient
 	private boolean reviewedByCustomer;
+
+	public Product() {
+	}
+
+	public Product(Integer id) {
+		this.id = id;
+	}
+
+	public Product(String name) {
+		this.name = name;
+	}
 
 	public Integer getId() {
 		return id;
@@ -304,7 +317,7 @@ public class Product {
 	public String getMainImagePath() {
 		if (id == null || mainImage == null)
 			return "/images/image-thumbnail.png";
-		return "/product-images/" + this.id + "/" + this.mainImage;
+		return Constants.S3_BASE_URI+"/product-images/" + this.id + "/" + this.mainImage;
 	}
 
 	@Transient

@@ -62,8 +62,13 @@
 			</form>
 		</div>
 
-		<div th:if="${message!=null}" class="alert alert-success text-center">
+		<!-- <div th:if="${message!=null}" class="alert alert-success text-center">
+			[[${message}]]</div> -->
+
+		<div th:if="${message != null}"
+			th:class="${messageType == 'error'} ? 'alert alert-danger text-center':'alert alert-success text-center' ">
 			[[${message}]]</div>
+			
 		<div class="full-details">
 			<table
 				class="table table-bordered table-striped table-hover table-responsive-xl">
@@ -138,16 +143,26 @@
 							th:href="@{'/products/detail/'+${product.id}}"
 							title="view details of this product"> </a>&nbsp; <th:block
 								sec:authorize="hasAnyAuthority('admin','Editor','SalesPersion')">
-								<a class="fa-solid fa-pen-to-square icon-green"
+
+								<!-- <a class="fa-solid fa-pen-to-square icon-green"
 									th:href="@{/products/edit/{id} (id=${product.id}) }"
-									title="Edit The Product"> </a>
+									title="Edit The Product"> </a> -->
+									&nbsp;
+
+								<div
+									th:replace="fragments :: edit('product', '/products/edit/' + ${product.id})" />
 
 							</th:block> &nbsp; <th:block
 								sec:authorize="hasAnyAuthority('admin','Editor')">
-								<a class="fa-solid fa-trash link-delete icon-red"
+
+								<!-- 	<a class="fa-solid fa-trash link-delete icon-red"
 									th:name="${product.name}" th:id="${product.id}"
 									th:href="@{/products/delete/{id} (id=${product.id} , pgNo=${pageNumber})}"
-									title="Delete The Product"> </a>
+									title="Delete The Product"> </a> -->
+									
+									&nbsp; 
+						<div
+									th:replace="fragments :: delete('product', ${product.id}, '/products/delete/' + ${product.id}, true)" />
 
 							</th:block></td>
 
@@ -182,17 +197,26 @@
 							title="view details of this product"> </a>&nbsp;
 						<th:block
 							sec:authorize="hasAnyAuthority('admin','Editor','SalesPersion')">
-							<a class="fa-solid fa-pen-to-square icon-green"
+
+							<!-- 	<a class="fa-solid fa-pen-to-square icon-green"
 								th:href="@{/products/edit/{id} (id=${product.id}) }"
-								title="Edit The Product"> </a>
+								title="Edit The Product"> </a> -->
+								
+							&nbsp; 	
+					<div
+								th:replace="fragments :: edit('product', '/products/edit/' + ${product.id})" />
 
 						</th:block>
 						&nbsp;
 						<th:block sec:authorize="hasAnyAuthority('admin','Editor')">
-							<a class="fa-solid fa-trash link-delete icon-red"
+							<!-- 	<a class="fa-solid fa-trash link-delete icon-red"
 								th:name="${product.name}" th:id="${product.id}"
 								th:href="@{/products/delete/{id} (id=${product.id} , pgNo=${pageNumber})}"
-								title="Delete The Product"> </a>
+								title="Delete The Product"> </a> -->
+								
+								&nbsp; 
+					<div
+								th:replace="fragments :: delete('product', ${product.id}, '/products/delete/' + ${product.id}, true)" />
 
 						</th:block>
 					</div>
@@ -220,7 +244,8 @@
 
 
 
-		<div th:replace="navbarPaging::pagination('products')"></div>
+		<!-- 	<div th:replace="navbarPaging::pagination('products')"></div> -->
+		<div th:replace="fragments :: pagination('products')"></div>
 
 		<div th:replace="modal_fragments::confirm-model('Delete product')"></div>
 		<div th:replace="fragments::footer"></div>

@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import com.shopme.admin.AmazonS3Util;
 import com.shopme.admin.FileUploadUtil;
 import com.shopme.admin.brand.BrandService;
 import com.shopme.admin.brand.export.BrandCsvExporter;
@@ -125,10 +126,10 @@ public class BrandController {
 			RedirectAttributes redirectAttributes, @Param("sortField") String sortField,
 			@Param("sortDir") String sortDir, @Param("keyword") String keyword,
 			@RequestParam("image") MultipartFile multiPartFile) throws IOException {
-		System.out.println(brand);
-		for (int i = 0; i < 10; i++)
-			System.out.println(multiPartFile.getOriginalFilename());
-
+		/*
+		 * System.out.println(brand); for (int i = 0; i < 10; i++)
+		 * System.out.println(multiPartFile.getOriginalFilename());
+		 */
 		if (!multiPartFile.isEmpty()) {
 			String fileName = StringUtils.cleanPath(multiPartFile.getOriginalFilename()); // I think it removes /, \ and
 																							// file path.
@@ -137,11 +138,16 @@ public class BrandController {
 			// optional
 			brand.setLogo(fileName);
 			Brand savedBrand = brandService.save(brand); // save
+			
 			String uploadDir = "brand-photos/" + savedBrand.getId();
-			// System.out.println(multiPartFile.getContentType()); image/png
-
-			FileUploadUtil.cleanDir(uploadDir);
-			FileUploadUtil.saveFile(uploadDir, fileName, multiPartFile);
+			/*
+			 * FileUploadUtil.cleanDir(uploadDir); FileUploadUtil.saveFile(uploadDir,
+			 * fileName, multiPartFile);
+			 */
+			
+			AmazonS3Util.removeFolder(uploadDir);
+			AmazonS3Util.uploadFile(uploadDir, fileName, multiPartFile.getInputStream());
+			
 		} else {
 			if (brand.getLogo().isEmpty())
 				brand.setLogo(null);
@@ -237,8 +243,12 @@ public class BrandController {
 		try {
 			brandService.deleteById(id);
 			redirectAttributes.addFlashAttribute("message", "Brand Id " + id + " Deleted Successfully");
-			String deleteDir = "brand-photos/" + id;
-			FileUploadUtil.removeDir(deleteDir);
+			
+			String brandDir = "brand-photos/" + id;
+			AmazonS3Util.removeFolder(brandDir);
+			
+//			FileUploadUtil.removeDir(brandDir);
+			
 		} catch(Exception ex) {
 			redirectAttributes.addFlashAttribute("message", ex.getMessage());
 		}

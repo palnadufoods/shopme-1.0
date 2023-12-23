@@ -11,8 +11,9 @@
 		<div>
 			<h3>Manage Users -> [[${pageTitle}]]</h3>
 		</div>
-
-		<form th:action="@{/users/save/{pageNum} (pageNum=${pageNumber}) }"
+		
+		<!-- /{pageNum} (pageNum=${pageNumber}) -->
+		<form th:action="@{/users/save}"  
 			method="post" style="max-width: 700px; margin: 0 auto"
 			th:object="${user}" enctype="multipart/form-data"
 			onsubmit="return checkEmailUnique(this)">

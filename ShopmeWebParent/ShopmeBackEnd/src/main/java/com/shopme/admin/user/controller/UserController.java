@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import com.shopme.admin.AmazonS3Util;
 import com.shopme.admin.FileUploadUtil;
 import com.shopme.admin.paging.PagingAndSortingHelper;
 import com.shopme.admin.paging.PagingAndSortingParam;
@@ -31,26 +32,26 @@ import com.shopme.common.entity.User;
 
 @Controller
 public class UserController {
-	
+
 	private String defaultRedirectURL = "redirect:/users/page/1?sortField=firstName&sortDir=asc";
-	
+
 	@Autowired
 	private UserService userService;
-	
+
 	@GetMapping("/users")
 	public String listFirstPage() {
 		return defaultRedirectURL;
 	}
-	
+
 	@GetMapping("/users/page/{pageNum}")
 	public String listByPage(
 			@PagingAndSortingParam(listName = "listOfUsers", moduleURL = "/users") PagingAndSortingHelper helper,
 			@PathVariable(name = "pageNum") int pageNum) {
-		userService.listByPage(pageNum, helper);		
-		
-		return "users";		
+		userService.listByPage(pageNum, helper);
+
+		return "users";
 	}
-	
+
 	/*
 	 * @GetMapping("/usersall") public String listAll(Model model) { List<User>
 	 * listOfUsers = userService.listAll();
@@ -112,9 +113,38 @@ public class UserController {
 		return "user_form";
 	}
 
-	@PostMapping("/users/save/{pageNum}")
-	public String saveUser(@PathVariable("pageNum") int pageNum, User user, RedirectAttributes redirectAttributes,
-			 @Param("sortField") String sortField, @Param("sortDir") String sortDir,@Param("keyword") String keyword,
+	/*
+	 * @PostMapping("/users/save/{pageNum}") public String
+	 * saveUser(@PathVariable("pageNum") int pageNum, User user, RedirectAttributes
+	 * redirectAttributes,
+	 * 
+	 * @Param("sortField") String sortField, @Param("sortDir") String
+	 * sortDir, @Param("keyword") String keyword,
+	 * 
+	 * @RequestParam("image") MultipartFile multiPartFile) throws IOException {
+	 * System.out.println(user); for (int i = 0; i < 10; i++)
+	 * System.out.println(multiPartFile.getOriginalFilename());
+	 * 
+	 * if (!multiPartFile.isEmpty()) { String fileName =
+	 * StringUtils.cleanPath(multiPartFile.getOriginalFilename()); // I think it
+	 * removes /, \ and // file path. fileName = fileName.replaceAll(" ", ""); //
+	 * fileName=user.getId()+"."+multiPartFile.getContentType().substring(6); // //
+	 * optional user.setPhotos(fileName); User savedUser = userService.save(user);
+	 * String uploadDir = "user-photos/" + savedUser.getId(); //
+	 * System.out.println(multiPartFile.getContentType()); image/png
+	 * 
+	 * FileUploadUtil.cleanDir(uploadDir); FileUploadUtil.saveFile(uploadDir,
+	 * fileName, multiPartFile); } else { if (user.getPhotos().isEmpty())
+	 * user.setPhotos(null); userService.save(user); }
+	 * redirectAttributes.addFlashAttribute("message",
+	 * "The User Details have been Saved Successfully");
+	 * 
+	 * return getRedirectUrltoAffectedUser(user); }
+	 */
+	
+	@PostMapping("/users/save")
+	public String saveUser(User user, RedirectAttributes redirectAttributes,
+			@Param("sortField") String sortField, @Param("sortDir") String sortDir, @Param("keyword") String keyword,
 			@RequestParam("image") MultipartFile multiPartFile) throws IOException {
 		System.out.println(user);
 		for (int i = 0; i < 10; i++)
@@ -131,29 +161,57 @@ public class UserController {
 			String uploadDir = "user-photos/" + savedUser.getId();
 			// System.out.println(multiPartFile.getContentType()); image/png
 
-			FileUploadUtil.cleanDir(uploadDir);
-			FileUploadUtil.saveFile(uploadDir, fileName, multiPartFile);
+			/*
+			 * FileUploadUtil.cleanDir(uploadDir); FileUploadUtil.saveFile(uploadDir,
+			 * fileName, multiPartFile);
+			 */
+			
+			AmazonS3Util.removeFolder(uploadDir);
+			AmazonS3Util.uploadFile(uploadDir, fileName, multiPartFile.getInputStream());	
 		} else {
 			if (user.getPhotos().isEmpty())
 				user.setPhotos(null);
 			userService.save(user);
 		}
 		redirectAttributes.addFlashAttribute("message", "The User Details have been Saved Successfully");
-		
+
 		return getRedirectUrltoAffectedUser(user);
 	}
-
 	private String getRedirectUrltoAffectedUser(User user) {
-		
-		String firstPartOfEmail=user.getEmail().split("@")[0];
-		return "redirect:/users/page/1?sortField=id&sortDir=asc&keyword="+firstPartOfEmail;
+
+		String firstPartOfEmail = user.getEmail().split("@")[0];
+		return "redirect:/users/page/1?sortField=id&sortDir=asc&keyword=" + firstPartOfEmail;
 	}
 
-	@GetMapping("/users/edit/{pageNum}/{id}")
-	public String updateUser(@PathVariable(name = "pageNum") int pageNum, @PathVariable(name = "id") Integer id,
-			Model model, @Param("sortField") String sortField, @Param("sortDir") String sortDir,
-			@Param("keyword") String keyword,
-			RedirectAttributes redirectAttributes) {
+	/*
+	 * @GetMapping("/users/edit/{pageNum}/{id}") public String
+	 * updateUser(@PathVariable(name = "pageNum") int pageNum, @PathVariable(name =
+	 * "id") Integer id, Model model, @Param("sortField") String
+	 * sortField, @Param("sortDir") String sortDir,
+	 * 
+	 * @Param("keyword") String keyword, RedirectAttributes redirectAttributes) {
+	 * try { List<Role> listRoles = userService.listRoles(); User user =
+	 * userService.get(id); if (user == null) throw new
+	 * UserNotFoundException(" lawada lo ERROR RA IDHI");
+	 * model.addAttribute("pageTitle", "Update User[" + id + "]");
+	 * model.addAttribute("user", user); model.addAttribute("listRoles", listRoles);
+	 * model.addAttribute("pageNumber", pageNum); model.addAttribute("keyword",
+	 * keyword); model.addAttribute("sortField", sortField);
+	 * model.addAttribute("sortDir", sortDir);
+	 * System.out.println("  sort Field >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"+
+	 * sortField); System.out.println("  sort Dir >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"+
+	 * sortDir);
+	 * 
+	 * return "user_form"; } catch (UserNotFoundException e) {
+	 * redirectAttributes.addFlashAttribute("message", e.getMessage()); return
+	 * "redirect:/users/page/" + pageNum + "?sortField=firstName&sortDir=asc"; }
+	 * 
+	 * }
+	 */
+
+	@GetMapping("/users/edit/{id}")
+	public String updateUser(@PathVariable(name = "id") Integer id,
+			Model model, RedirectAttributes redirectAttributes) {
 		try {
 			List<Role> listRoles = userService.listRoles();
 			User user = userService.get(id);
@@ -162,71 +220,99 @@ public class UserController {
 			model.addAttribute("pageTitle", "Update User[" + id + "]");
 			model.addAttribute("user", user);
 			model.addAttribute("listRoles", listRoles);
-			model.addAttribute("pageNumber", pageNum);
-			model.addAttribute("keyword", keyword);
-			model.addAttribute("sortField", sortField);
-			model.addAttribute("sortDir", sortDir);
-			System.out.println("  sort Field >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"+ sortField);
-			System.out.println("  sort Dir >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"+ sortDir);
-			
 			return "user_form";
 		} catch (UserNotFoundException e) {
 			redirectAttributes.addFlashAttribute("message", e.getMessage());
-			return "redirect:/users/page/" + pageNum + "?sortField=firstName&sortDir=asc";
+			// return "redirect:/users/page/" + pageNum +
+			// "?sortField=firstName&sortDir=asc";
+			return defaultRedirectURL;
 		}
 
 	}
 
-	@GetMapping("/users/delete/{pageNum}/{id}")
-	public String deleteUser(@PathVariable(name = "pageNum") int pageNum, @PathVariable(name = "id") Integer id,
-			@Param("sortField") String sortField, @Param("sortDir") String sortDir,@Param("keyword") String keyword,
-			Model model, RedirectAttributes redirectAttributes) {
+	/*
+	 * @GetMapping("/users/delete/{pageNum}/{id}") public String
+	 * deleteUser(@PathVariable(name = "pageNum") int pageNum, @PathVariable(name =
+	 * "id") Integer id,
+	 * 
+	 * @Param("sortField") String sortField, @Param("sortDir") String
+	 * sortDir, @Param("keyword") String keyword, Model model, RedirectAttributes
+	 * redirectAttributes) { try { userService.deleteUser(id);
+	 * redirectAttributes.addFlashAttribute("message", "User Id " + id +
+	 * " Deleted Successfully"); } catch (UserNotFoundException e) {
+	 * redirectAttributes.addFlashAttribute("message", e.getMessage()); } return
+	 * "redirect:/users/page/" + pageNum + "?sortField=" + sortField + "&sortDir=" +
+	 * sortDir; }
+	 */
+
+	@GetMapping("/users/delete/{id}")
+	public String deleteUser(@PathVariable(name = "id") Integer id, Model model,
+			RedirectAttributes redirectAttributes) {
 		try {
 			userService.deleteUser(id);
+			
+			String userPhotosDir = "user-photos/" + id;
+			AmazonS3Util.removeFolder(userPhotosDir);
+			
 			redirectAttributes.addFlashAttribute("message", "User Id " + id + " Deleted Successfully");
 		} catch (UserNotFoundException e) {
 			redirectAttributes.addFlashAttribute("message", e.getMessage());
 		}
-		return "redirect:/users/page/" + pageNum + "?sortField="+sortField+"&sortDir="+sortDir;
+		// return "redirect:/users/page/" + pageNum + "?sortField=" + sortField +
+		// "&sortDir=" + sortDir;
+		return defaultRedirectURL;
+	}
+	
+	/*
+	 * @GetMapping("/users/enable/{pageNum}/{id}/{enabled}") public String
+	 * enabledisable(@PathVariable("pageNum") int pageNum, @PathVariable("id") int
+	 * id,
+	 * 
+	 * @PathVariable("enabled") boolean enabled, RedirectAttributes
+	 * redirectAttributes) { for (int i = 0; i < 10; i++) System.out.println();
+	 * System.out.println("id =" + id + " enabled=" + enabled);
+	 * userService.updateEnabledStatus(id, enabled); if (enabled)
+	 * redirectAttributes.addFlashAttribute("message", "User Id " + id +
+	 * " has been Enabled"); else if (!enabled)
+	 * redirectAttributes.addFlashAttribute("message", "User Id " + id +
+	 * " has been Disabled"); return "redirect:/users/page/" + pageNum +
+	 * "?sortField=firstName&sortDir=asc"; }
+	 */
+	
+	
+	@GetMapping("/users/{id}/enabled/{status}")
+	public String updateUserEnabledStatus(@PathVariable("id") Integer id,
+			@PathVariable("status") boolean enabled, RedirectAttributes redirectAttributes) {
+		userService.updateEnabledStatus(id, enabled);
+		String status = enabled ? "enabled" : "disabled";
+		String message = "The user ID " + id + " has been " + status;
+		redirectAttributes.addFlashAttribute("message", message);
+		
+		return defaultRedirectURL;
+	}
+	
+	
+	
+
+	@GetMapping("/users/export/csv")
+	public void exportToCSV(HttpServletResponse response) throws IOException {
+		List<User> listAll = userService.listAll();
+		UserCsvExporter exporter = new UserCsvExporter();
+		exporter.export(listAll, response);
 	}
 
-	@GetMapping("/users/enable/{pageNum}/{id}/{enabled}")
-	public String enabledisable(@PathVariable("pageNum") int pageNum, @PathVariable("id") int id,
-			@PathVariable("enabled") boolean enabled, RedirectAttributes redirectAttributes) {
-		for (int i = 0; i < 10; i++)
-			System.out.println();
-		System.out.println("id =" + id + " enabled=" + enabled);
-		userService.updateEnabledStatus(id, enabled);
-		if (enabled)
-			redirectAttributes.addFlashAttribute("message", "User Id " + id + " has been Enabled");
-		else if (!enabled)
-			redirectAttributes.addFlashAttribute("message", "User Id " + id + " has been Disabled");
-		return "redirect:/users/page/" + pageNum + "?sortField=firstName&sortDir=asc";
-	}
-	
-	@GetMapping("/users/export/csv")
-	public void exportToCSV(HttpServletResponse response) throws IOException
-	{
-		List<User> listAll=userService.listAll();
-		UserCsvExporter exporter=new UserCsvExporter();
-		exporter.export(listAll,response);	
-	}
-	
-	
 	@GetMapping("/users/export/excel")
-	public void exportToExcel(HttpServletResponse response) throws IOException
-	{
-		List<User> listAll=userService.listAll();
-		UserExcelExporter exporter=new UserExcelExporter();
-		exporter.export(listAll,response);
+	public void exportToExcel(HttpServletResponse response) throws IOException {
+		List<User> listAll = userService.listAll();
+		UserExcelExporter exporter = new UserExcelExporter();
+		exporter.export(listAll, response);
 	}
-	
+
 	@GetMapping("/users/export/pdf")
-	public void exportToPdf(HttpServletResponse response) throws IOException
-	{
-		List<User> listAll=userService.listAll();
-		UserPdfExporter exporter=new UserPdfExporter();
-		exporter.export(listAll,response);
+	public void exportToPdf(HttpServletResponse response) throws IOException {
+		List<User> listAll = userService.listAll();
+		UserPdfExporter exporter = new UserPdfExporter();
+		exporter.export(listAll, response);
 	}
 
 }

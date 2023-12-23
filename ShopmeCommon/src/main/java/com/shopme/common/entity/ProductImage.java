@@ -10,6 +10,8 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
+import com.shopme.common.Constants;
+
 @Entity
 @Table(name = "product_images")
 public class ProductImage {
@@ -73,7 +75,7 @@ public class ProductImage {
 
 	@Transient
 	public String getImagePath() {
-		return "/product-images/" + product.getId() + "/extras/" + this.name;
+		return Constants.S3_BASE_URI+"/product-images/" + product.getId() + "/extras/" + this.name;
 		// return
 		// "C:/Users/sai/eclipse-workspace2021-12-RestApi1/ShopmeProject/ShopmeWebParent/product-images/16/extras/dell.png";
 	}

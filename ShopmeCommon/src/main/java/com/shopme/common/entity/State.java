@@ -21,6 +21,10 @@ public class State extends IdBasedEntity {
 		
 	}
 	
+	public State(Integer id) {
+		this.id=id;
+	}
+	
 	public State(String name, Country country) {
 		this.name = name;
 		this.country = country;
